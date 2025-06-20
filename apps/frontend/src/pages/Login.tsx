@@ -1,42 +1,58 @@
 import { useState } from 'react';
+import { Box, Button, Heading, Input, Stack, createToaster } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const toaster = createToaster({
+  placement: 'top',
+});
+
+const LoginPage = () => {
   const [username, setUsername] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) return;
+    if (!username) {
+      toaster.create({
+        title: 'Please enter a username',
+      });
+      return;
+    }
 
-    const res = await fetch('http://localhost:3001/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username }),
-    });
+    const user = {
+      id: Date.now(), // Generate a simple ID
+      username: username,
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`, // Generate avatar URL
+    };
 
-    const data = await res.json();
-    login(data.user);
+    await login(user);
     navigate('/feed');
   };
 
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl mb-4">Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Enter username"
-          className="border p-2 rounded w-full"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <button className="bg-blue-600 text-white px-4 py-2 rounded">Login</button>
-      </form>
-    </div>
+ return (
+    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50" px={4}>
+      <Box bg="white" p={8} rounded="lg" shadow="lg" w="full" maxW="sm">
+        <Heading mb={6} size="lg" textAlign="center">
+          Welcome Back
+        </Heading>
+        <form>
+          <Stack>
+            <Input
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              size="md"
+            />
+            <Button colorScheme="blue" onClick={handleSubmit}>
+              Login
+            </Button>
+          </Stack>
+        </form>
+      </Box>
+    </Box>
   );
 };
 
-export default Login;
+export default LoginPage;
