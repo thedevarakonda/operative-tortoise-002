@@ -1,12 +1,19 @@
 import express from 'express';
+import cors from 'cors';
+import authRoutes from './routes/auth';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
+
+app.use(express.json()); // Middleware to parse JSON
+app.use(cors());
+
+app.use('/api', authRoutes); // Mount auth routes
 
 app.get('/', (_req, res) => {
-  res.send('Backend is running!');
+  res.send('API is running...');
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is listening at http://localhost:${PORT}`);
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
