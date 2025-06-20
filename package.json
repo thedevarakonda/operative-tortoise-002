@@ -1,0 +1,25 @@
+{
+  "name": "operative-tortoise-002",
+  "version": "1.0.0",
+  "private":true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "description": "Social Media Project for Operative Tortoise",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thedevarakonda/operative-tortoise-002.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thedevarakonda/operative-tortoise-002/issues"
+  },
+  "homepage": "https://github.com/thedevarakonda/operative-tortoise-002#readme"
+}
