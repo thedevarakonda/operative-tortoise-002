@@ -1,8 +1,22 @@
-import { Box, Heading, Text, Stack, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Heading,
+  Text,
+  Stack,
+  Image,
+  Button,
+} from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Feed = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
@@ -41,9 +55,18 @@ const Feed = () => {
             </Text>
           )}
         </Box>
-        <Stack gap={2}>
+
+        <Stack gap={4} align="center">
           <Heading size="md">Hello, {user?.username} 👋</Heading>
           <Text color="gray.600">Welcome to your feed.</Text>
+          <Button
+            onClick={handleLogout}
+            colorScheme="red"
+            variant="solid"
+            size="sm"
+          >
+            Logout
+          </Button>
         </Stack>
       </Box>
     </Box>
