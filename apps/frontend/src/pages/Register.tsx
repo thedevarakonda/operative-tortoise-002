@@ -9,33 +9,32 @@ import {
   Link,
   createToaster,
 } from '@chakra-ui/react';
-import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const toaster = createToaster({ placement: 'top' });
 
-const LoginPage = () => {
+const Register = () => {
   const [username, setUsername] = useState('');
-  const { login } = useAuth();
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegister = async () => {
     if (!username) {
-      toaster.create({
-        title: 'Please enter a username',
+      toaster.create({ 
+        title: 'Username is required',
         type: "error"
       });
       return;
     }
 
-    const user = {
+    const newUser = {
       id: Date.now(),
-      username: username,
+      username,
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
     };
 
-    await login(user);
+    login(newUser);
     navigate('/feed');
   };
 
@@ -43,23 +42,23 @@ const LoginPage = () => {
     <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50" px={4}>
       <Box bg="white" p={8} rounded="lg" shadow="lg" w="full" maxW="sm">
         <Heading mb={6} size="lg" textAlign="center">
-          Welcome Back
+          Create an Account
         </Heading>
         <form>
-          <Stack>
+          <Stack gap={4}>
             <Input
-              placeholder="Enter your username"
+              placeholder="Choose a username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               size="md"
             />
-            <Button colorScheme="blue" onClick={handleSubmit}>
-              Login
+            <Button colorScheme="teal" onClick={handleRegister}>
+              Register
             </Button>
             <Text fontSize="sm" textAlign="center">
-              New here?{' '}
-              <Link as={RouterLink} to="/register" color="blue.500">
-                Create an account
+              Already have an account?{' '}
+              <Link as={RouterLink} to="/login" color="blue.500">
+                Log in
               </Link>
             </Text>
           </Stack>
@@ -69,4 +68,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Register;

@@ -3,6 +3,7 @@ import Login from './pages/Login';
 import Feed from './pages/Feed';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="register" element={<Register/>}/>
           <Route
             path="/feed"
             element={
