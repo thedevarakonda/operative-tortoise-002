@@ -5,9 +5,13 @@ import {
   Stack,
   Image,
   Button,
+  Badge,
+  IconButton,
 } from '@chakra-ui/react';
+import { BiSolidUpvote } from "react-icons/bi";
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { mockPosts } from '../mock/posts'; // <-- NEW IMPORT
 
 const Feed = () => {
   const { user, logout } = useAuth();
@@ -28,6 +32,7 @@ const Feed = () => {
         mx="auto"
         p={6}
         textAlign="center"
+        mb={8}
       >
         <Box
           w="96px"
@@ -59,14 +64,32 @@ const Feed = () => {
         <Stack gap={4} align="center">
           <Heading size="md">Hello, {user?.username} 👋</Heading>
           <Text color="gray.600">Welcome to your feed.</Text>
-          <Button
-            onClick={handleLogout}
-            colorScheme="red"
-            variant="solid"
-            size="sm"
-          >
+          <Button onClick={handleLogout} colorScheme="red" size="sm">
             Logout
           </Button>
+        </Stack>
+      </Box>
+
+      <Box maxW="xl" mx="auto">
+        <Stack>
+          {mockPosts.map((post) => (
+            <Box key={post.id} p={6} bg="white" rounded="md" shadow="sm">
+              <Heading size="sm" mb={2}>
+                {post.title}
+              </Heading>
+              <Text mb={3}>{post.content}</Text>
+              <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
+                <Text>by {post.author}</Text>
+                <Text>{new Date(post.createdAt).toLocaleString()}</Text>
+              </Stack>
+              <Stack mt={3} direction="row" align="center">
+                <IconButton size="xs" aria-label="Upvote" variant="ghost">
+                  <BiSolidUpvote/>
+                </IconButton>
+                <Badge colorScheme="blue">{post.upvotes}</Badge>
+              </Stack>
+            </Box>
+          ))}
         </Stack>
       </Box>
     </Box>
