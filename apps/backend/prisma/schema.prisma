@@ -15,4 +15,16 @@ model User {
   avatar    String?
   bio       String?
   createdAt DateTime @default(now())
+  posts Post[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  upvotes   Int      @default(0)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String   // ← must match User.id type
 }
