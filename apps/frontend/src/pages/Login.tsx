@@ -16,27 +16,54 @@ const toaster = createToaster({ placement: 'top' });
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!username) {
+  const handleLogin = async () => {
+    if (!username || !password) {
       toaster.create({
-        title: 'Please enter a username',
-        type: "error"
+        title: 'Both fields are required',
+        type: 'error',
       });
       return;
     }
 
-    const user = {
-      id: Date.now(),
-      username: username,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-    };
+    setIsSubmitting(true);
 
-    await login(user);
-    navigate('/feed');
+    try {
+      const res = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toaster.create({
+          title: data.error || 'Login failed',
+          type: 'error',
+        });
+        return;
+      }
+
+      login(data.user);
+      toaster.create({
+        title: `Welcome back, ${data.user.username}!`,
+        type: 'success',
+      });
+      navigate('/feed');
+    } catch (err) {
+      console.error(err);
+      toaster.create({
+        title: 'Network error. Please try again later.',
+        type: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -45,25 +72,37 @@ const LoginPage = () => {
         <Heading mb={6} size="lg" textAlign="center">
           Welcome Back
         </Heading>
-        <form>
-          <Stack>
-            <Input
-              placeholder="Enter your username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              size="md"
-            />
-            <Button colorScheme="blue" onClick={handleSubmit}>
-              Login
-            </Button>
-            <Text fontSize="sm" textAlign="center">
-              New here?{' '}
-              <Link as={RouterLink} to="/register" color="blue.500">
-                Create an account
-              </Link>
-            </Text>
-          </Stack>
-        </form>
+        <Stack gap={4}>
+          <Input
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            size="md"
+            disabled={isSubmitting}
+          />
+          <Input
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            size="md"
+            disabled={isSubmitting}
+          />
+          <Button
+            colorScheme="blue"
+            onClick={handleLogin}
+            loading={isSubmitting}
+            loadingText="Logging in..."
+          >
+            Login
+          </Button>
+          <Text fontSize="sm" textAlign="center">
+            New here?{' '}
+            <Link as={RouterLink} to="/register" color="blue.500">
+              Create an account
+            </Link>
+          </Text>
+        </Stack>
       </Box>
     </Box>
   );
