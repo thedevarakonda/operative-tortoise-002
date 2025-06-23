@@ -11,8 +11,9 @@ import {
 } from '@chakra-ui/react';
 import { BiSolidUpvote } from 'react-icons/bi';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { toaster } from '../components/ui/toaster';
 
 interface Post {
   id: number;
@@ -31,12 +32,27 @@ const Feed = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-
+  useEffect(() => {
+    if (location.state?.from === 'new') {
+      toaster.create({
+        title: 'Post created successfully 🎉',
+        type: 'success',
+        duration: 2000,
+      });
+    } else {
+      toaster.create({
+        title: `Welcome back, ${user?.username}!`,
+        type: 'success',
+        duration: 2000,
+      });
+    }
+  }, []);
   useEffect(() => {
     const fetchPosts = async () => {
       try {

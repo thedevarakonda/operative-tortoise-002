@@ -6,13 +6,11 @@ import {
   Input,
   Stack,
   Text,
-  Link,
-  createToaster,
+  Link
 } from '@chakra-ui/react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-
-const toaster = createToaster({ placement: 'top' });
+import { toaster } from '../components/ui/toaster'; 
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -25,7 +23,7 @@ const Register = () => {
     e.preventDefault();
 
     if (!username || !email || !password) {
-      toaster.create({ title: 'All fields are required', type: 'error' });
+      toaster.create({ title: 'All fields are required', type: 'error', duration: 2000 });
       return;
     }
 

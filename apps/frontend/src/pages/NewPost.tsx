@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import {
   Box,
   Button,
@@ -6,56 +6,90 @@ import {
   Textarea,
   Heading,
   Stack,
-  createToaster,
+  Spinner
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { toaster } from '../components/ui/toaster'; 
 
-const toaster = createToaster({ placement: 'top' });
+// const toaster = createToaster({ placement: '  top' });
 
 const NewPost = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!user) {
+      toaster.create({
+        title: 'You must be logged in to post!',
+        type: 'error',
+        closable: true,
+        duration: 2000,
+      });
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async () => {
-    if (!title || !content) {
-      toaster.create({ title: 'Title and content are required', type: 'error' });
+  if (!title || !content) {
+    toaster.create({
+      title: 'Title and content are required',
+      type: 'error',
+      closable: true,
+      duration: 2000,
+    });
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    const res = await fetch('http://localhost:3001/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        content,
+        authorId: user?.id,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toaster.create({
+        title: data.error || 'Failed to create post',
+        type: 'error',
+      });
       return;
     }
 
-    setIsSubmitting(true);
+  toaster.create({ title: 'Creating your post...', type: 'info' });
+  setIsRedirecting(true); // Trigger spinner
 
-    try {
-      const res = await fetch('http://localhost:3001/api/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          content,
-          authorId: user?.id,
-        }),
-      });
+  setTimeout(() => {
+    navigate('/feed', { state: { from: 'new' } });
+  }, 2000);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        toaster.create({ title: data.error || 'Failed to create post', type: 'error' });
-        return;
-      }
-
-      toaster.create({ title: 'Post created successfully', type: 'success' });
-      navigate('/feed');
-    } catch (err) {
-      console.error(err);
-      toaster.create({ title: 'Something went wrong', type: 'error' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    toaster.create({ title: 'Something went wrong', type: 'error' });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+  if (isRedirecting) {
+  return (
+    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
+      <Spinner size="xl" color="teal.500"  />
+    </Box>
+  );
+}
 
   return (
     <Box maxW="lg" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
