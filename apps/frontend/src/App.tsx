@@ -4,7 +4,7 @@ import Feed from './pages/Feed';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
 import Register from './pages/Register';
-
+import NewPost from './pages/NewPost'
 function App() {
   return (
     <AuthProvider>
@@ -20,6 +20,7 @@ function App() {
               </PrivateRoute>
             }
           />
+          <Route path="/new" element={<NewPost />} />
         </Routes>
       </Router>
     </AuthProvider>
