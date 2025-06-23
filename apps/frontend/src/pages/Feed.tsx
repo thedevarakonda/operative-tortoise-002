@@ -32,6 +32,9 @@ const Feed = () => {
   const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'mine'>('all');
+  const [filterLoading, setFilterLoading] = useState(false);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const location = useLocation();
 
   const handleLogout = () => {
@@ -45,7 +48,7 @@ const Feed = () => {
         type: 'success',
         duration: 2000,
       });
-    } else {
+    } else if(location.state?.from === 'login') {
       toaster.create({
         title: `Welcome back, ${user?.username}!`,
         type: 'success',
@@ -58,7 +61,7 @@ const Feed = () => {
       try {
         const res = await fetch('http://localhost:3001/api/posts');
         const data = await res.json();
-        setPosts(data);
+        setAllPosts(data);
       } catch (err) {
         console.error('Failed to fetch posts:', err);
       } finally {
@@ -68,6 +71,24 @@ const Feed = () => {
 
     fetchPosts();
   }, []);
+
+  useEffect(() => {
+    if (filter === 'all') {
+      setPosts(allPosts);
+    } else {
+      const userPosts = allPosts.filter(post => post.author?.username === user?.username);
+      setPosts(userPosts);
+    }
+  }, [filter, allPosts, user]);
+
+  const handleFilterChange = (type: 'all' | 'mine') => {
+    if (type === filter) return;
+    setFilterLoading(true);
+    setTimeout(() => {
+      setFilter(type);
+      setFilterLoading(false);
+    }, 300); // 1 second delay
+  };
 
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
@@ -118,14 +139,32 @@ const Feed = () => {
       </Box>
 
       <Box maxW="xl" mx="auto">
-          <Button
-            colorScheme="teal"
-            mb={4}
-            onClick={() => navigate('/new')}
-          >
-            + New Post
-          </Button>
-        {loading ? (
+            <Stack direction="row" spaceX={4} mb={4} justify="center">
+              <Button
+                bgColor={'green.500'}
+                color="white"
+                onClick={() => navigate('/new')}
+              >
+                + New Post
+              </Button>
+              <Button
+                variant={filter === 'all' ? 'solid' : 'outline'}
+                colorScheme="blue"
+                onClick={() => handleFilterChange('all')}
+                disabled={filterLoading}
+              >
+                All Posts
+              </Button>
+              <Button
+                variant={filter === 'mine' ? 'solid' : 'outline'}
+                colorScheme="blue"
+                onClick={() => handleFilterChange('mine')}
+                disabled={filterLoading}
+              >
+                My Posts
+              </Button>
+            </Stack>
+        {loading || filterLoading ? (
           <Spinner />
         ) : (
           <Stack>

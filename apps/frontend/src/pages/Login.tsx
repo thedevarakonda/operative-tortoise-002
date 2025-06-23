@@ -56,7 +56,7 @@ const LoginPage = () => {
 
       setIsRedirecting(true); // Show spinner
       setTimeout(() => {
-        navigate('/feed');
+        navigate('/feed', { state: { from: 'login' } });
       }, 2000);
     } catch (err) {
       console.error(err);
