@@ -7,17 +7,19 @@ import {
   Stack,
   Text,
   Link,
-  createToaster,
+  Spinner
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { toaster } from '../components/ui/toaster'; 
 
-const toaster = createToaster({ placement: 'top' });
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -50,11 +52,12 @@ const LoginPage = () => {
       }
 
       login(data.user);
-      toaster.create({
-        title: `Welcome back, ${data.user.username}!`,
-        type: 'success',
-      });
-      navigate('/feed');
+
+
+      setIsRedirecting(true); // Show spinner
+      setTimeout(() => {
+        navigate('/feed');
+      }, 2000);
     } catch (err) {
       console.error(err);
       toaster.create({
@@ -65,6 +68,14 @@ const LoginPage = () => {
       setIsSubmitting(false);
     }
   };
+
+  if(isRedirecting){
+    return (
+    <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
+      <Spinner size="xl" color="blue.500" />
+    </Box>
+  );
+  }
 
   return (
     <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50" px={4}>

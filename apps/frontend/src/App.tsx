@@ -5,6 +5,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './routes/PrivateRoute';
 import Register from './pages/Register';
 import NewPost from './pages/NewPost'
+
 function App() {
   return (
     <AuthProvider>
