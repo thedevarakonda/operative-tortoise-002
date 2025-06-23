@@ -102,6 +102,13 @@ const Feed = () => {
       </Box>
 
       <Box maxW="xl" mx="auto">
+          <Button
+            colorScheme="teal"
+            mb={4}
+            onClick={() => navigate('/new')}
+          >
+            + New Post
+          </Button>
         {loading ? (
           <Spinner />
         ) : (
