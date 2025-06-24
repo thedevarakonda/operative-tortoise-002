@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate,useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toaster } from '../components/ui/toaster';
+import { motion } from 'framer-motion';
 
 interface Post {
   id: number;
@@ -91,37 +92,42 @@ const Feed = () => {
   };
 
 const handleUpvote = async (postId: number) => {
-  const upvoted = JSON.parse(localStorage.getItem('upvotedPosts') || '[]');
-
-  if (upvoted.includes(postId)) {
-    toaster.create({ title: 'You already upvoted this post', type: 'info' });
-    return;
-  }
+  const localKey = `upvoted_${postId}`;
+  const hasVoted = localStorage.getItem(localKey);
 
   try {
-    const res = await fetch(`http://localhost:3001/api/posts/${postId}/upvote`, {
+    const res = await fetch(`http://localhost:3001/api/posts/${postId}/${hasVoted ? 'unvote' : 'upvote'}`, {
       method: 'POST',
     });
 
-    if (!res.ok) {
-      throw new Error('Failed to upvote');
-    }
+    if (!res.ok) throw new Error();
 
-    // Update UI
+    // Optimistic UI update
     setPosts((prev) =>
       prev.map((post) =>
-        post.id === postId ? { ...post, upvotes: post.upvotes + 1 } : post
+        post.id === postId
+          ? { ...post, upvotes: post.upvotes + (hasVoted ? -1 : 1) }
+          : post
       )
     );
 
-    // Save to localStorage
-    localStorage.setItem('upvotedPosts', JSON.stringify([...upvoted, postId]));
+    // Update local storage
+    if (hasVoted) {
+      localStorage.removeItem(localKey);
+    } else {
+      localStorage.setItem(localKey, 'true');
+    }
+
   } catch (err) {
-    console.error('Upvote failed:', err);
-    toaster.create({ title: 'Failed to upvote post', type: 'error' });
+    toaster.create({
+      title: 'Failed to update vote',
+      type: 'error',
+    });
   }
 };
-
+  const hasUpvoted = (postId: number) => {
+    return localStorage.getItem(`upvoted_${postId}`) === 'true';
+  };
 
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
@@ -212,9 +218,20 @@ const handleUpvote = async (postId: number) => {
                   <Text>{new Date(post.createdAt).toLocaleString()}</Text>
                 </Stack>
                 <Stack mt={3} direction="row" align="center">
-                  <IconButton size="xs" aria-label="Upvote" variant="ghost">
-                    <BiSolidUpvote onClick={() => handleUpvote(post.id)} />
-                  </IconButton>
+                  <motion.div
+                    whileTap={{ scale: 1.3 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <IconButton
+                      size="xs"
+                      aria-label="Upvote"
+                      variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
+                      colorScheme={hasUpvoted(post.id) ? 'blackAlpha' : 'gray'}
+                      onClick={() => handleUpvote(post.id)}
+                    >
+                      <BiSolidUpvote/>
+                      </IconButton>
+                  </motion.div>
                   <Badge colorScheme="blue">{post.upvotes}</Badge>
                 </Stack>
               </Box>
