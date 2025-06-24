@@ -4,6 +4,20 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
+router.post('/:id/unvote', async (req, res) => {
+  const postId = req.params.id;
+  try {
+    await prisma.post.update({
+      where: { id: Number(postId) },
+      data: { upvotes: { decrement: 1 } },
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to unvote post' });
+  }
+});
+
+
 //upvotes for a post
 
 router.post('/:id/upvote', async (req,res) => {
