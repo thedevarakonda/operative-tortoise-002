@@ -90,6 +90,39 @@ const Feed = () => {
     }, 300); // 1 second delay
   };
 
+const handleUpvote = async (postId: number) => {
+  const upvoted = JSON.parse(localStorage.getItem('upvotedPosts') || '[]');
+
+  if (upvoted.includes(postId)) {
+    toaster.create({ title: 'You already upvoted this post', type: 'info' });
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3001/api/posts/${postId}/upvote`, {
+      method: 'POST',
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to upvote');
+    }
+
+    // Update UI
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId ? { ...post, upvotes: post.upvotes + 1 } : post
+      )
+    );
+
+    // Save to localStorage
+    localStorage.setItem('upvotedPosts', JSON.stringify([...upvoted, postId]));
+  } catch (err) {
+    console.error('Upvote failed:', err);
+    toaster.create({ title: 'Failed to upvote post', type: 'error' });
+  }
+};
+
+
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
       <Box
@@ -180,7 +213,7 @@ const Feed = () => {
                 </Stack>
                 <Stack mt={3} direction="row" align="center">
                   <IconButton size="xs" aria-label="Upvote" variant="ghost">
-                    <BiSolidUpvote />
+                    <BiSolidUpvote onClick={() => handleUpvote(post.id)} />
                   </IconButton>
                   <Badge colorScheme="blue">{post.upvotes}</Badge>
                 </Stack>
