@@ -135,7 +135,18 @@ const Feed = () => {
 
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
-      <Box bg="white" rounded="lg" shadow="md" maxW="xl" mx="auto" p={6} textAlign="center" mb={8}>
+      <Box
+        bg="white"
+        rounded="xl"
+        shadow="xl"
+        maxW="xl"
+        mx="auto"
+        p={6}
+        textAlign="center"
+        mb={8}
+        transition="all 0.3s"
+        _hover={{ shadow: "2xl" }}
+      >
         <Box
           w="96px"
           h="96px"
@@ -143,13 +154,25 @@ const Feed = () => {
           overflow="hidden"
           mx="auto"
           mb={4}
-          bg="gray.200"
+          bg="gray.100"
           display="flex"
           alignItems="center"
           justifyContent="center"
+          border="2px solid"
+          borderColor="gray.200"
+          cursor="pointer"
+          transition="transform 0.2s"
+          _hover={{ transform: "scale(1.05)" }}
+          onClick={() => navigate("/profile")}
         >
           {user?.avatar ? (
-            <Image src={user.avatar} alt={user.username} w="full" h="full" objectFit="cover" />
+            <Image
+              src={user.avatar}
+              alt={user.username}
+              w="full"
+              h="full"
+              objectFit="cover"
+            />
           ) : (
             <Text fontSize="2xl" fontWeight="bold" color="gray.500">
               {user?.username?.charAt(0).toUpperCase()}
@@ -157,10 +180,18 @@ const Feed = () => {
           )}
         </Box>
 
-        <Stack gap={4} align="center">
+        <Stack spaceX ={3} align="center">
           <Heading size="md">Hello, {user?.username} 👋</Heading>
-          <Text color="gray.600">Welcome to your feed.</Text>
-          <Button onClick={handleLogout} colorScheme="red" size="sm">
+          <Text color="gray.600" fontSize="sm">
+            Welcome back to your feed.
+          </Text>
+          <Button
+            onClick={handleLogout}
+            size="sm"
+            variant="outline"
+            colorScheme="red"
+            _hover={{ bg: "red.50" }}
+          >
             Logout
           </Button>
         </Stack>
@@ -221,12 +252,12 @@ const Feed = () => {
                       <BiSolidUpvote/>
                       </IconButton>
                   </motion.div>
-                    <Badge colorScheme="blue">{post.upvotes}</Badge>
+                    <Badge colorScheme="blue" size={'lg'}>{post.upvotes}</Badge>
 
                     {isOwner && (
                       <>
                         <IconButton
-                          size="xs"
+                          size="md"
                           aria-label="Edit"
                           variant='ghost'
                           color={'blue.500'}
@@ -234,7 +265,7 @@ const Feed = () => {
                         >  
                           <BiEdit />
                         </IconButton><IconButton
-                          size="xs"
+                          size="md"
                           aria-label="Delete"
                           variant='ghost'
                           color={'red'}
