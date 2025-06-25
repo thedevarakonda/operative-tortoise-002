@@ -75,8 +75,6 @@ router.get('/posts', async (_req, res) => {
   }
 });
 
-export default router;
-
 // Update an existing post
 router.put('/posts/:id', async (req, res) => {
   const postId = Number(req.params.id);
@@ -117,3 +115,5 @@ router.delete('/posts/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete post' });
   }
 });
+
+export default router;

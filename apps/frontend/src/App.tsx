@@ -6,6 +6,7 @@ import PrivateRoute from './routes/PrivateRoute';
 import Register from './pages/Register';
 import NewPost from './pages/NewPost'
 import EditPost from './pages/EditPost';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function App() {
           />
           <Route path="/new" element={<NewPost />} />
           <Route path="/edit/:id" element={<EditPost />} />
-
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
     </AuthProvider>
