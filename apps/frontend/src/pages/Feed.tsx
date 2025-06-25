@@ -9,7 +9,7 @@ import {
   IconButton,
   Spinner,
 } from '@chakra-ui/react';
-import { BiSolidUpvote } from 'react-icons/bi';
+import { BiSolidUpvote,BiEdit, BiTrash } from 'react-icons/bi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -48,6 +48,8 @@ const Feed = () => {
       toaster.create({ title: 'Post created successfully 🎉', type: 'success', duration: 2000 });
     } else if (location.state?.from === 'login') {
       toaster.create({ title: `Welcome back, ${user?.username}!`, type: 'success', duration: 2000 });
+    } else if (location.state?.from === 'edit') {
+      toaster.create({ title: `Post edited successfully !`, type: 'success', duration: 2000 });
     }
   }, []);
 
@@ -223,12 +225,23 @@ const Feed = () => {
 
                     {isOwner && (
                       <>
-                        <Button size="xs" colorScheme="blue" variant="outline" onClick={() => navigate(`/edit/${post.id}`, { state: { post } })}>
-                          Edit
-                        </Button>
-                        <Button size="xs" colorScheme="red" variant="outline" onClick={() => handleDelete(post.id)}>
-                          Delete
-                        </Button>
+                        <IconButton
+                          size="xs"
+                          aria-label="Edit"
+                          variant='ghost'
+                          color={'blue.500'}
+                          onClick={() => navigate(`/edit/${post.id}`, { state: { post } })}
+                        >  
+                          <BiEdit />
+                        </IconButton><IconButton
+                          size="xs"
+                          aria-label="Delete"
+                          variant='ghost'
+                          color={'red'}
+                          onClick={() => handleDelete(post.id)}
+                        >  
+                          <BiTrash/>
+                        </IconButton>
                       </>
                     )}
                   </Stack>
