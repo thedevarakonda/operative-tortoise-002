@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import NewPost from './pages/NewPost'
 import EditPost from './pages/EditPost';
 import Profile from './pages/Profile';
+import ChangePassword from './pages/ChangePassword';
 
 function App() {
   return (
@@ -23,9 +24,10 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route path="/new" element={<NewPost />} />
-          <Route path="/edit/:id" element={<EditPost />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/new" element={<PrivateRoute><NewPost /></PrivateRoute>} />
+          <Route path="/edit/:id" element={<PrivateRoute><EditPost /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

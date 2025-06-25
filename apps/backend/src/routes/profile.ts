@@ -29,4 +29,41 @@ router.get('/profile/:id', async (req, res) => {
   });
 });
 
+router.put('/profile/:id/password', async (req, res) => {
+  const userId = (req.params.id);
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    res.status(400).json({ error: 'Both current and new passwords are required' });
+    return;
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+        res.status(404).json({ error: 'User not found' });
+        return;
+    } 
+
+    if (user.password !== currentPassword) {
+      res.status(401).json({ error: 'Current password is incorrect' });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: newPassword },
+    });
+
+    res.json({ success: true, message: 'Password updated successfully' });
+    return 
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+    return ;
+  }
+});
+
+
 export default router;
