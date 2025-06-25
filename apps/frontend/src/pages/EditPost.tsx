@@ -63,11 +63,11 @@ const EditPost = () => {
         return;
       }
 
-      toaster.create({ title: 'Updating your post...', type: 'info' });
+      toaster.create({ title: 'Updating your post...', type: 'info' , duration: 1500});
       setIsRedirecting(true);
 
       setTimeout(() => {
-        navigate('/feed');
+        navigate('/feed', { state: { from: 'edit' } });
       }, 1500);
     } catch (err) {
       console.error(err);
