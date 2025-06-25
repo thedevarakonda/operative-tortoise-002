@@ -7,10 +7,14 @@ const app = express();
 const PORT = 3001;
 
 app.use(express.json()); // Middleware to parse JSON
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5137', // or whatever port your frontend runs on
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 app.use('/api', authRoutes); // Mount auth routes
-app.use('/api/posts', postRoutes);
+app.use('/api', postRoutes);
 
 app.get('/', (_req, res) => {
   res.send('API is running...');

@@ -4,7 +4,21 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
-router.post('/:id/unvote', async (req, res) => {
+router.post('/posts/:id/upvote', async (req,res) => {
+  const postId = req.params.id;
+  console.log("In upvote handler Got id ",postId);
+  try {
+    await prisma.post.update({
+      where: { id: Number(postId) },
+      data: { upvotes: { increment: 1 } },
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to upvote post' });
+  }
+});
+
+router.post('/posts/:id/unvote', async (req, res) => {
   const postId = req.params.id;
   try {
     await prisma.post.update({
@@ -18,26 +32,11 @@ router.post('/:id/unvote', async (req, res) => {
 });
 
 
-//upvotes for a post
-
-router.post('/:id/upvote', async (req,res) => {
-  const postId = req.params.id;
-  console.log("Got id ",postId);
-  try {
-    await prisma.post.update({
-      where: { id: Number(postId) },
-      data: { upvotes: { increment: 1 } },
-    });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to upvote post' });
-  }
-});
 
 // Create a new post
-router.post('/', async (req, res) => {
+router.post('/posts', async (req, res) => {
   const { title, content, authorId } = req.body;
-
+  console.log("In / post")
   if (!title || !content || !authorId) {
     res.status(400).json({ error: 'Title, content, and authorId are required' });
     return;
@@ -59,7 +58,7 @@ router.post('/', async (req, res) => {
 });
 
 // Get all posts
-router.get('/', async (_req, res) => {
+router.get('/posts', async (_req, res) => {
   try {
     const posts = await prisma.post.findMany({
       orderBy: { createdAt: 'desc' },
@@ -77,3 +76,44 @@ router.get('/', async (_req, res) => {
 });
 
 export default router;
+
+// Update an existing post
+router.put('/posts/:id', async (req, res) => {
+  const postId = Number(req.params.id);
+  const { title, content } = req.body;
+
+  if (!title || !content) {
+    res.status(400).json({ error: 'Title and content are required' });
+    return;
+  }
+
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        title,
+        content,
+        updatedAt: new Date(),
+      },
+    });
+    res.json(updatedPost);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update post' });
+  }
+});
+
+// Delete a post
+router.delete('/posts/:id', async (req, res) => {
+  const postId = Number(req.params.id);
+  console.log("in delete req handler")
+  try {
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete post' });
+  }
+});
