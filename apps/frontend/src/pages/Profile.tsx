@@ -70,8 +70,11 @@ const Profile = () => {
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
         <Text>Joined on: <strong>{formattedDate}</strong></Text>
         <Text>Year: <strong>{joinedYear}</strong></Text>
-        <Button colorScheme="blue" onClick={() => navigate('/change-password')}>
+        <Button onClick={() => navigate('/change-password')}>
           Edit Password
+        </Button>
+        <Button onClick={() => navigate('/feed')}>
+          Back
         </Button>
       </Stack>
     </Box>
