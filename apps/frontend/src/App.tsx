@@ -26,7 +26,7 @@ function App() {
           />
           <Route path="/new" element={<PrivateRoute><NewPost /></PrivateRoute>} />
           <Route path="/edit/:id" element={<PrivateRoute><EditPost /></PrivateRoute>} />
-          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/profile/:username" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
         </Routes>
       </Router>
