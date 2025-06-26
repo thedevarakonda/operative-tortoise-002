@@ -4,21 +4,23 @@ import {
   Flex,
   Box,
   Input,
-  InputGroup,
   Menu,
   Text,
   Image,
   Button,
   Portal,
-  IconButton
+  IconButton,
+  Group
 } from "@chakra-ui/react";
-import { BiSearchAlt2 } from "react-icons/bi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toaster } from "./ui/toaster";
+import { useState } from "react";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLogout = async () => {
     try {
@@ -34,11 +36,32 @@ const Navbar = () => {
   };
 
   const handleProfileClick = () => {
-    navigate("/profile");
+    navigate(`/profile/${user?.username}`);
   };
 
   const handleSettingsClick = () => {
     navigate("/settings"); // Changed from "/change-password" to "/settings"
+  };
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) return;
+
+    try {
+        console.log(searchTerm)
+      const res = await fetch(`http://localhost:3001/api/user/${searchTerm}`);
+      if (!res.ok) {
+        throw new Error("User not found");
+      }
+      const data = await res.json();
+      navigate(`/profile/${searchTerm}`,{ state: { userId: data.id } });
+    } catch (err) {
+      toaster.create({
+        title: "User not found",
+        type: "error",
+        duration: 3000,
+        closable: true,
+      });
+    }
   };
 
   return (
@@ -67,16 +90,17 @@ const Navbar = () => {
       </Box>
 
       {/* Search bar */}
-      <InputGroup maxW="400px" flex="1" mx={6} startElement={<BiSearchAlt2/>}> 
-        <Input 
-          type="text" 
-          placeholder="Search posts..." 
-          bg="gray.50"
-          border="1px solid"
-          borderColor="gray.200"
-          _hover={{ borderColor: "gray.300" }}
+      <Flex maxW="400px" flex="1" mx={6}>
+        <Input
+          placeholder="Search username..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          mr={2}
         />
-      </InputGroup>
+        <Button variant="outline" onClick={handleSearch}>
+          Search
+        </Button>
+      </Flex>
 
       <Menu.Root>
         <Menu.Trigger asChild>

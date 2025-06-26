@@ -9,7 +9,7 @@ import {
   Image
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 
 interface UserProfile {
   name: string;
@@ -23,13 +23,15 @@ const Profile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const userId = state?.userId;
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user?.id) return;
+      if (!userId) return;
 
       try {
-        const res = await fetch(`http://localhost:3001/api/profile/${user.id}`);
+        const res = await fetch(`http://localhost:3001/api/profile/${userId}`);
         const data = await res.json();
         setProfile(data);
       } catch (err) {
@@ -70,9 +72,11 @@ const Profile = () => {
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
         <Text>Joined on: <strong>{formattedDate}</strong></Text>
         <Text>Year: <strong>{joinedYear}</strong></Text>
-        <Button onClick={() => navigate('/change-password')}>
-          Edit Password
-        </Button>
+        {user?.id === userId && (
+          <Button onClick={() => navigate('/change-password')}>
+            Edit Password
+          </Button>
+        )}
         <Button onClick={() => navigate('/feed')}>
           Back
         </Button>
