@@ -15,6 +15,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toaster } from '../components/ui/toaster';
 import { motion } from 'framer-motion';
+import Navbar from '../components/NavBar';
 
 interface Post {
   id: number;
@@ -135,7 +136,7 @@ const Feed = () => {
 
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
-      <Box
+      {/* <Box
         bg="white"
         rounded="xl"
         shadow="xl"
@@ -195,7 +196,8 @@ const Feed = () => {
             Logout
           </Button>
         </Stack>
-      </Box>
+      </Box> */}
+      <Navbar/>
 
       <Box maxW="xl" mx="auto">
         <Stack direction="row"  mb={4} justify="center">
