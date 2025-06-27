@@ -75,6 +75,27 @@ router.get('/posts', async (_req, res) => {
   }
 });
 
+
+router.get('/posts/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: { id: Number(id) },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        createdAt: true
+      }
+    });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch user's posts" });
+  }
+});
+
 // Update an existing post
 router.put('/posts/:id', async (req, res) => {
   const postId = Number(req.params.id);
