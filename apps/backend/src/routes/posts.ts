@@ -137,4 +137,32 @@ router.delete('/posts/:id', async (req, res) => {
   }
 });
 
+// Get detailed info for a single post (without comments)
+router.get('/posts/:id/detail', async (req, res) => {
+  console.log("Got request")
+  const postId = Number(req.params.id);
+
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      include: {
+        author: {
+          select: { username: true, avatar: true }
+        }
+      }
+    });
+
+    if (!post) {
+      res.status(404).json({ error: 'Post not found' });
+      return;
+    }
+
+    res.json(post);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch post detail' });
+  }
+});
+
+
 export default router;
