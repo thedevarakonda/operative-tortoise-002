@@ -138,7 +138,15 @@ const Feed = () => {
             {posts.map(post => {
               const isOwner = post.author?.username === user?.username;
               return (
-                <Box key={post.id} p={6} bg="white" rounded="md" shadow="sm">
+                <motion.div
+                  whileHover={{ scale: 1.02, boxShadow: '0px 4px 20px rgba(0,0,0,0.1)' }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                  onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
+                >
+                <Box 
+                  key={post.id} p={6} bg="white" rounded="md" shadow="sm" 
+                >
                   <Heading size="sm" mb={2}>
                     {post.title}
                   </Heading>
@@ -157,12 +165,14 @@ const Feed = () => {
                       size="xs"
                       aria-label="Upvote"
                       variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
-                      onClick={() =>
+                      onClick={(e) =>{
+                        e.stopPropagation();
                         toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
                           setPosts(prev =>
                             prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
                           )
                         )
+                      }
                       }
                     >
                       <BiSolidUpvote/>
@@ -177,7 +187,10 @@ const Feed = () => {
                           aria-label="Edit"
                           variant='ghost'
                           color={'blue.500'}
-                          onClick={() => navigate(`/edit/${post.id}`, { state: { post } })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/edit/${post.id}`, { state: { post } });
+                          }}
                         >  
                           <BiEdit />
                         </IconButton><IconButton
@@ -185,7 +198,10 @@ const Feed = () => {
                           aria-label="Delete"
                           variant='ghost'
                           color={'red'}
-                          onClick={() => handleDelete(post.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(post.id);
+                          }}
                         >  
                           <BiTrash/>
                         </IconButton>
@@ -193,6 +209,7 @@ const Feed = () => {
                     )}
                   </Stack>
                 </Box>
+                </motion.div>
               );
             })}
           </Stack>
