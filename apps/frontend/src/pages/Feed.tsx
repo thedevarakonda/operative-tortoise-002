@@ -3,7 +3,6 @@ import {
   Heading,
   Text,
   Stack,
-  Image,
   Button,
   Badge,
   IconButton,
@@ -15,8 +14,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toaster } from '../components/ui/toaster';
 import { motion } from 'framer-motion';
-import Navbar from '../components/NavBar';
-
+import Navbar from '../components/Navbar';
+import { useUpvote } from '../hooks/useUpvote';
 interface Post {
   id: number;
   title: string;
@@ -37,6 +36,7 @@ const Feed = () => {
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const [filterLoading, setFilterLoading] = useState(false);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const { hasUpvoted, toggleUpvote } = useUpvote();
   const location = useLocation();
 
   const handleLogout = () => {
@@ -88,32 +88,6 @@ const Feed = () => {
     }, 300);
   };
 
-  const handleUpvote = async (postId: number) => {
-    const localKey = `upvoted_${postId}`;
-    const hasVoted = localStorage.getItem(localKey);
-
-    try {
-      const res = await fetch(`http://localhost:3001/api/posts/${postId}/${hasVoted ? 'unvote' : 'upvote'}`, {
-        method: 'POST',
-      });
-
-      if (!res.ok) throw new Error();
-
-      setPosts(prev =>
-        prev.map(post =>
-          post.id === postId ? { ...post, upvotes: post.upvotes + (hasVoted ? -1 : 1) } : post
-        )
-      );
-
-      if (hasVoted) {
-        localStorage.removeItem(localKey);
-      } else {
-        localStorage.setItem(localKey, 'true');
-      }
-    } catch (err) {
-      toaster.create({ title: 'Failed to update vote', type: 'error' });
-    }
-  };
 
   const handleDelete = async (postId: number) => {
     const confirm = window.confirm('Are you sure you want to delete this post?');
@@ -130,73 +104,8 @@ const Feed = () => {
     }
   };
 
-  const hasUpvoted = (postId: number) => {
-    return localStorage.getItem(`upvoted_${postId}`) === 'true';
-  };
-
   return (
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
-      {/* <Box
-        bg="white"
-        rounded="xl"
-        shadow="xl"
-        maxW="xl"
-        mx="auto"
-        p={6}
-        textAlign="center"
-        mb={8}
-        transition="all 0.3s"
-        _hover={{ shadow: "2xl" }}
-      >
-        <Box
-          w="96px"
-          h="96px"
-          rounded="full"
-          overflow="hidden"
-          mx="auto"
-          mb={4}
-          bg="gray.100"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          border="2px solid"
-          borderColor="gray.200"
-          cursor="pointer"
-          transition="transform 0.2s"
-          _hover={{ transform: "scale(1.05)" }}
-          onClick={() => navigate("/profile")}
-        >
-          {user?.avatar ? (
-            <Image
-              src={user.avatar}
-              alt={user.username}
-              w="full"
-              h="full"
-              objectFit="cover"
-            />
-          ) : (
-            <Text fontSize="2xl" fontWeight="bold" color="gray.500">
-              {user?.username?.charAt(0).toUpperCase()}
-            </Text>
-          )}
-        </Box>
-
-        <Stack spaceX ={3} align="center">
-          <Heading size="md">Hello, {user?.username} 👋</Heading>
-          <Text color="gray.600" fontSize="sm">
-            Welcome back to your feed.
-          </Text>
-          <Button
-            onClick={handleLogout}
-            size="sm"
-            variant="outline"
-            colorScheme="red"
-            _hover={{ bg: "red.50" }}
-          >
-            Logout
-          </Button>
-        </Stack>
-      </Box> */}
       <Navbar/>
 
       <Box maxW="xl" mx="auto">
@@ -248,8 +157,13 @@ const Feed = () => {
                       size="xs"
                       aria-label="Upvote"
                       variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
-                      colorScheme={hasUpvoted(post.id) ? 'blackAlpha' : 'gray'}
-                      onClick={() => handleUpvote(post.id)}
+                      onClick={() =>
+                        toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+                          setPosts(prev =>
+                            prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                          )
+                        )
+                      }
                     >
                       <BiSolidUpvote/>
                       </IconButton>

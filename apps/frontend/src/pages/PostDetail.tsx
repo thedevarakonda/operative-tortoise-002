@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
-  Text,
   Heading,
-  Spinner,
-  Image,
+  Text,
   Stack,
-  Button,
+  Image,
+  IconButton,
+  Badge,
+  Spinner,
 } from "@chakra-ui/react";
-
-interface PostDetailData {
+import { BiSolidUpvote } from "react-icons/bi";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useUpvote } from '../hooks/useUpvote';
+import { motion } from 'framer-motion';
+interface PostDetail {
   id: number;
   title: string;
   content: string;
@@ -18,35 +21,35 @@ interface PostDetailData {
   upvotes: number;
   author: {
     username: string;
-    avatar: string;
+    avatar?: string;
   };
 }
 
 const PostDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const [post, setPost] = useState<PostDetailData | null>(null);
+  const { id } = useParams();
+  const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const { hasUpvoted, toggleUpvote } = useUpvote();
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const res = await fetch(`http://localhost:3001/api/posts/${id}/detail`);
         const data = await res.json();
-        setPost(data);
+        setPost(data); // assuming backend returns array of 1 item
       } catch (err) {
-        console.error("Failed to load post", err);
+        console.error("Failed to fetch post", err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchPost();
+    fetchPost();
   }, [id]);
 
   if (loading) {
     return (
-      <Box p={6} textAlign="center">
+      <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
         <Spinner size="xl" />
       </Box>
     );
@@ -54,24 +57,72 @@ const PostDetail = () => {
 
   if (!post) {
     return (
-      <Box p={6} textAlign="center">
+      <Box textAlign="center" mt={10}>
         <Text>Post not found.</Text>
-        <Button mt={4} onClick={() => navigate("/feed")}>Back to Feed</Button>
       </Box>
     );
   }
 
   return (
-    <Box maxW="3xl" mx="auto" p={6} bg="white" rounded="md" shadow="md" mt={6}>
-      <Stack direction="row" align="center" mb={4}>
-        <Image src={post.author.avatar} alt={post.author.username} />
-        <Text fontWeight="bold">{post.author.username}</Text>
-        <Text color="gray.500">{new Date(post.createdAt).toLocaleString()}</Text>
+    <Box maxW="xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
+      {/* Title & Avatar */}
+      <Stack direction="row" align="center" spaceX={4} mb={4}>
+        {post.author.avatar ? (
+          <Image
+            boxSize="40px"
+            borderRadius="full"
+            src={post.author.avatar}
+            alt={post.author.username}
+          />
+        ) : (
+          <Box
+            boxSize="40px"
+            borderRadius="full"
+            bg="gray.200"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            fontWeight="bold"
+            color="gray.600"
+          >
+            {post.author.username.charAt(0).toUpperCase()}
+          </Box>
+        )}
+        <Heading size="md">{post.title}</Heading>
       </Stack>
-      <Heading size="lg" mb={2}>{post.title}</Heading>
-      <Text fontSize="md" mb={4}>{post.content}</Text>
-      <Text color="gray.600">Upvotes: {post.upvotes}</Text>
-      <Button mt={4} onClick={() => navigate("/feed")}>Back to Feed</Button>
+
+      {/* Content */}
+      <Text mb={4}>{post.content}</Text>
+
+      {/* Author and Date */}
+      <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500" mb={2}>
+        <Text>By {post.author.username}</Text>
+        <Text>{new Date(post.createdAt).toLocaleString()}</Text>
+      </Stack>
+
+      {/* Upvote Section */}
+      <Stack direction="row" align="center" mt={2}>
+        <motion.div
+          whileTap={{ scale: 1.3 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
+        <IconButton
+          size="sm"
+          aria-label="Upvote"
+          variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
+          // colorScheme="gray"
+          onClick={() =>
+            toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+              setPost({ ...post, upvotes: newUpvotes })
+            )
+          }
+          // onClick={() => handleUpvote(post.id)} // to be implemented
+        >
+          <BiSolidUpvote/>  
+        </IconButton>
+        </motion.div>
+        <Badge colorScheme="blue">{post.upvotes}</Badge>
+      </Stack>
     </Box>
   );
 };
