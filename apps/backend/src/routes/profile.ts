@@ -29,6 +29,32 @@ router.get('/profile/:id', async (req, res) => {
   });
 });
 
+
+//Get all posts of a particular User
+router.get('/profile/:id/posts', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: { authorId: id },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        updatedAt: true,
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+    });
+
+    res.json(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user posts' });
+  }
+});
+
 router.put('/profile/:id/password', async (req, res) => {
   const userId = (req.params.id);
   const { currentPassword, newPassword } = req.body;

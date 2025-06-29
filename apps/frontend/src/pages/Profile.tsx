@@ -22,7 +22,7 @@ interface Post {
   id: string;
   title: string;
   content: string;
-  createdAt: string;
+  updatedAt: string;
 }
 
 const Profile = () => {
@@ -33,7 +33,6 @@ const Profile = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const userId = state?.userId;
-
   useEffect(() => {
     const fetchProfileAndPosts = async () => {
       if (!userId) return;
@@ -54,7 +53,7 @@ const Profile = () => {
     };
 
     fetchProfileAndPosts();
-  }, [userId]);
+  },[userId]);
 
   if (loading) {
     return (
@@ -83,7 +82,7 @@ const Profile = () => {
         <Heading size="md">{profile.name}</Heading>
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
         <Text>Joined on: <strong>{formattedDate}</strong></Text>
-        <Text>Year: <strong>{joinedYear}</strong></Text>
+        {/* <Text>Year: <strong>{joinedYear}</strong></Text> */}
 
         {user?.id === userId && (
           <Button onClick={() => navigate('/change-password')}>
@@ -93,7 +92,6 @@ const Profile = () => {
         <Button onClick={() => navigate('/feed')}>Back</Button>
       </Stack>
 
-      {/* <Divider my={6} /> */}
 
       <Box>
         <Heading size="md" mb={4}>Posts by {profile.name}</Heading>
@@ -104,7 +102,7 @@ const Profile = () => {
             <Box key={post.id} p={4} mb={4} borderWidth="1px" borderRadius="md">
               <Heading size="sm">{post.title}</Heading>
               <Text fontSize="sm" color="gray.600">
-                {new Date(post.createdAt).toLocaleDateString()}
+                {new Date(post.updatedAt).toLocaleDateString()}
               </Text>
               <Text mt={2}>{post.content}</Text>
             </Box>
