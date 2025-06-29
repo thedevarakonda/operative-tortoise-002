@@ -16,11 +16,14 @@ import { toaster } from '../components/ui/toaster';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import { useUpvote } from '../hooks/useUpvote';
+import { useDeletePost } from '../hooks/useDeletePost';
+
 interface Post {
   id: number;
   title: string;
   content: string;
   createdAt: string;
+  updatedAt: string;
   upvotes: number;
   author: {
     username: string;
@@ -38,6 +41,7 @@ const Feed = () => {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const { hasUpvoted, toggleUpvote } = useUpvote();
   const location = useLocation();
+  const {deletePost} = useDeletePost(); 
 
   const handleLogout = () => {
     logout();
@@ -88,20 +92,10 @@ const Feed = () => {
     }, 300);
   };
 
-
-  const handleDelete = async (postId: number) => {
-    const confirm = window.confirm('Are you sure you want to delete this post?');
-    if (!confirm) return;
-
-    try {
-      console.log(`Calling URL http://localhost:3001/api/posts/${postId}`)
-      const res = await fetch(`http://localhost:3001/api/posts/${postId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
-      setPosts(prev => prev.filter(post => post.id !== postId));
-      toaster.create({ title: 'Post deleted successfully', type: 'success' });
-    } catch (err) {
-      toaster.create({ title: 'Failed to delete post', type: 'error' });
-    }
+  const handleDelete = (postId: number) => {
+    deletePost(postId, () =>
+      setPosts(prev => prev.filter(post => post.id !== postId))
+    );
   };
 
   return (
@@ -153,7 +147,7 @@ const Feed = () => {
                   <Text mb={3}>{post.content}</Text>
                   <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
                     <Text>by {post.author?.username}</Text>
-                    <Text>{new Date(post.createdAt).toLocaleString()}</Text>
+                    <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
                   </Stack>
 
                   <Stack mt={3} direction="row" align="center">
