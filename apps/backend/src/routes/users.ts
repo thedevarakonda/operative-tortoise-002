@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get('/user/:username', async (req, res) => {
+  console.log("GET request for user profile")
   const { username } = req.params;
 
   try {

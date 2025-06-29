@@ -137,6 +137,7 @@ const Feed = () => {
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 300 }}
                   onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
+                  key={post.id}
                 >
                 <Box 
                   key={post.id} p={6} bg="white" rounded="md" shadow="sm" 

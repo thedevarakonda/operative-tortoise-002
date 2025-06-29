@@ -36,7 +36,10 @@ const Navbar = () => {
   };
 
   const handleProfileClick = () => {
-    navigate(`/profile/${user?.username}`);
+    console.log("Handle profile clicked");
+    navigate(`/profile/${user?.username}`, {
+      state: { userId: user?.id },
+    });
   };
 
   const handleSettingsClick = () => {

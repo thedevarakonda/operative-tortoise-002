@@ -78,7 +78,6 @@ router.get('/posts', async (_req, res) => {
 
 router.get('/posts/:id', async (req, res) => {
   const id = req.params.id;
-
   try {
     const posts = await prisma.post.findMany({
       where: { id: Number(id) },
