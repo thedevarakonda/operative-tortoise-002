@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import {motion} from 'framer-motion'
 
 interface UserProfile {
   name: string;
@@ -99,6 +100,13 @@ const Profile = () => {
           <Text color="gray.500">No posts yet.</Text>
         ) : (
           posts.map((post) => (
+            <motion.div
+              whileHover={{ scale: 1.02, boxShadow: '0px 4px 20px rgba(0,0,0,0.1)' }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+              onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
+              key={post.id}
+            >
             <Box key={post.id} p={4} mb={4} borderWidth="1px" borderRadius="md">
               <Heading size="sm">{post.title}</Heading>
               <Text fontSize="sm" color="gray.600">
@@ -106,6 +114,7 @@ const Profile = () => {
               </Text>
               <Text mt={2}>{post.content}</Text>
             </Box>
+            </motion.div>
           ))
         )}
       </Box>
