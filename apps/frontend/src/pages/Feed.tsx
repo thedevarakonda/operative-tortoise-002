@@ -109,22 +109,22 @@ const Feed = () => {
           <Button bgColor={'green.500'} color="white" onClick={() => navigate('/new')}>
             + New Post
           </Button>
-          <Button
+          {/* <Button
             variant={filter === 'all' ? 'solid' : 'outline'}
             colorScheme="blue"
             onClick={() => handleFilterChange('all')}
             disabled={filterLoading}
           >
             All Posts
-          </Button>
-          <Button
+          </Button> */}
+          {/* <Button
             variant={filter === 'mine' ? 'solid' : 'outline'}
             colorScheme="blue"
             onClick={() => handleFilterChange('mine')}
             disabled={filterLoading}
           >
             My Posts
-          </Button>
+          </Button> */}
         </Stack>
 
         {loading || filterLoading ? (
