@@ -75,6 +75,32 @@ router.get('/posts', async (_req, res) => {
   }
 });
 
+// Get all posts except those of the logged-in user
+router.get('/other-posts/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: {
+          not: userId,
+        },
+      },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        author: {
+          select: { id: true, username: true, avatar: true },
+        },
+      },
+    });
+
+    res.json(posts);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
 
 router.get('/posts/:id', async (req, res) => {
   const id = req.params.id;

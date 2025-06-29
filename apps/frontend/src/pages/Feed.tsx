@@ -61,7 +61,7 @@ const Feed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/posts');
+        const res = await fetch(`http://localhost:3001/api/other-posts/${user?.id}`);
         const data = await res.json();
         setAllPosts(data);
       } catch (err) {
@@ -71,8 +71,10 @@ const Feed = () => {
       }
     };
 
-    fetchPosts();
-  }, []);
+    if (user?.id) {
+      fetchPosts();
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     if (filter === 'all') {
