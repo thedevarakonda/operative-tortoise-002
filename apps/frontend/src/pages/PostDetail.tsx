@@ -8,11 +8,14 @@ import {
   Badge,
   Spinner,
 } from "@chakra-ui/react";
-import { BiSolidUpvote } from "react-icons/bi";
+import { BiSolidUpvote,BiEdit,BiTrash } from "react-icons/bi";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate } from "react-router-dom";
 import { useUpvote } from '../hooks/useUpvote';
 import { motion } from 'framer-motion';
+import { useAuth } from "../context/AuthContext";
+import { useDeletePost } from "../hooks/useDeletePost";
+
 interface PostDetail {
   id: number;
   title: string;
@@ -30,13 +33,16 @@ const PostDetail = () => {
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const { hasUpvoted, toggleUpvote } = useUpvote();
+  const {user} = useAuth();
+  const navigate = useNavigate();
+  const { deletePost } = useDeletePost();
 
   useEffect(() => {
     const fetchPost = async () => {
       try {
         const res = await fetch(`http://localhost:3001/api/posts/${id}/detail`);
         const data = await res.json();
-        setPost(data); // assuming backend returns array of 1 item
+        setPost(data);
       } catch (err) {
         console.error("Failed to fetch post", err);
       } finally {
@@ -62,6 +68,10 @@ const PostDetail = () => {
       </Box>
     );
   }
+
+  const handleDelete = () => {
+    deletePost(post.id, () => navigate('/feed'));
+  };
 
   return (
     <Box maxW="xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
@@ -121,7 +131,34 @@ const PostDetail = () => {
           <BiSolidUpvote/>  
         </IconButton>
         </motion.div>
-        <Badge colorScheme="blue">{post.upvotes}</Badge>
+        <Badge colorScheme="blue" size={'lg'}>{post.upvotes}</Badge>
+        {(post.author.username === user?.username) && (
+        <>
+          <IconButton
+            size="md"
+            aria-label="Edit"
+            variant='ghost'
+            color={'blue.500'}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/edit/${post.id}`, { state: { post } });
+            }}
+          >  
+            <BiEdit />
+          </IconButton><IconButton
+            size="md"
+            aria-label="Delete"
+            variant='ghost'
+            color={'red'}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
+          >  
+            <BiTrash/>
+          </IconButton>
+        </>
+      )}
       </Stack>
     </Box>
   );
