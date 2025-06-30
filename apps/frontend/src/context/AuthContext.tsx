@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 
 type User = {
-  id: number;
+  id: string;
   username: string;
   avatar: string;
 };

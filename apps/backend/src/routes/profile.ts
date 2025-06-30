@@ -92,5 +92,23 @@ router.put('/profile/:id/password', async (req, res) => {
   }
 });
 
+router.get('/profile/username-to-id/:username', async (req, res) => {
+  const { username } = req.params;
+  console.log("Here ",username)
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { id: true }
+    });
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+    res.json({ id: user.id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 export default router;

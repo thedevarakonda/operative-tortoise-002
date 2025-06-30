@@ -11,10 +11,10 @@ import {
   Badge,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
-import {motion} from 'framer-motion'
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { BiSolidUpvote } from "react-icons/bi";
-import { useUpvote } from '../hooks/useUpvote';
+import { useUpvote } from "../hooks/useUpvote";
 
 interface UserProfile {
   name: string;
@@ -41,9 +41,33 @@ const Profile = () => {
   const { hasUpvoted, toggleUpvote } = useUpvote();
 
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { state } = useLocation();
-  const userId = state?.userId;
+  const { username } = useParams();
+
+  // Fetch userId if not in state
+  useEffect(() => {
+    if (state?.userId) {
+      setUserId(state.userId);
+      return;
+    }
+
+    const fetchUserId = async () => {
+      try {
+        const res = await fetch(`http://localhost:3001/api/profile/username-to-id/${username}`);
+        const data = await res.json();
+        if (data?.id) setUserId(data.id);
+        else throw new Error("User not found");
+      } catch (err) {
+        console.error("Error fetching user ID from username:", err);
+        setLoading(false);
+      }
+    };
+
+    if (username) fetchUserId();
+  }, [state?.userId, username]);
+
   useEffect(() => {
     const fetchProfileAndPosts = async () => {
       if (!userId) return;
@@ -63,8 +87,8 @@ const Profile = () => {
       }
     };
 
-    fetchProfileAndPosts();
-  },[userId]);
+    if (userId) fetchProfileAndPosts();
+  }, [userId]);
 
   if (loading) {
     return (
@@ -82,25 +106,21 @@ const Profile = () => {
     );
   }
 
-  const joinedDate = new Date(profile.createdAt);
-  const formattedDate = joinedDate.toLocaleDateString();
+  const joinedDate = new Date(profile.createdAt).toLocaleDateString();
 
   return (
     <Box maxW="3xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
-      <Stack align="center"  mb={6}>
+      <Stack align="center" mb={6}>
         <Image alt={profile.name} src={profile.avatar} borderRadius="full" boxSize="100px" />
         <Heading size="md">{profile.name}</Heading>
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
-        <Text>Joined on: <strong>{formattedDate}</strong></Text>
+        <Text>Joined on: <strong>{joinedDate}</strong></Text>
 
-        {user?.id === userId && (
-          <Button onClick={() => navigate('/change-password')}>
-            Edit Password
-          </Button>
+        {user?.id == userId && (
+          <Button onClick={() => navigate('/change-password')}>Edit Password</Button>
         )}
         <Button onClick={() => navigate('/feed')}>Back</Button>
       </Stack>
-
 
       <Box>
         <Heading size="md" mb={4}>Posts by {profile.name}</Heading>
@@ -109,50 +129,42 @@ const Profile = () => {
         ) : (
           posts.map((post) => (
             <motion.div
-              whileHover={{ scale: 1.02, boxShadow: '0px 4px 20px rgba(0,0,0,0.1)' }}
+              whileHover={{ scale: 1.02, boxShadow: "0px 4px 20px rgba(0,0,0,0.1)" }}
               whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 300 }}
+              transition={{ type: "spring", stiffness: 300 }}
               onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
               key={post.id}
             >
-              <Box 
-                  key={post.id} p={6} bg="white" rounded="md" shadow="sm" 
-                >
-                  <Heading size="sm" mb={2}>
-                    {post.title}
-                  </Heading>
-                  <Text mb={3}>{post.content}</Text>
-                  <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
-                    <Text>by {post.author?.username}</Text>
-                    <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
-                  </Stack>
+              <Box p={6} bg="white" rounded="md" shadow="sm">
+                <Heading size="sm" mb={2}>{post.title}</Heading>
+                <Text mb={3}>{post.content}</Text>
+                <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
+                  <Text>by {post.author?.username}</Text>
+                  <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
+                </Stack>
 
-                  <Stack mt={3} direction="row" align="center">
-                    <motion.div
-                    whileTap={{ scale: 1.3 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
+                <Stack mt={3} direction="row" align="center">
+                  <motion.div whileTap={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 300 }}>
                     <IconButton
-                    size="xs"
-                    aria-label="Upvote"
-                    variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-                        setPosts(prev =>
-                          prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
-                        )
-                      );
-                    }}
-                  >
-                    <BiSolidUpvote />
-                  </IconButton>
+                      size="xs"
+                      aria-label="Upvote"
+                      variant={hasUpvoted(post.id) ? "solid" : "outline"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+                          setPosts(prev =>
+                            prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                          )
+                        );
+                      }}
+                    >
+                      <BiSolidUpvote />
+                    </IconButton>
                   </motion.div>
-                  <Badge colorScheme="blue" size={"lg"}>{post.upvotes}</Badge>
-                  </Stack>
-                </Box>
+                  <Badge colorScheme="blue" size="lg">{post.upvotes}</Badge>
+                </Stack>
+              </Box>
             </motion.div>
-            
           ))
         )}
       </Box>
