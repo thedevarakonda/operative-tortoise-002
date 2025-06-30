@@ -109,22 +109,6 @@ const Feed = () => {
           <Button bgColor={'green.500'} color="white" onClick={() => navigate('/new')}>
             + New Post
           </Button>
-          {/* <Button
-            variant={filter === 'all' ? 'solid' : 'outline'}
-            colorScheme="blue"
-            onClick={() => handleFilterChange('all')}
-            disabled={filterLoading}
-          >
-            All Posts
-          </Button> */}
-          {/* <Button
-            variant={filter === 'mine' ? 'solid' : 'outline'}
-            colorScheme="blue"
-            onClick={() => handleFilterChange('mine')}
-            disabled={filterLoading}
-          >
-            My Posts
-          </Button> */}
         </Stack>
 
         {loading || filterLoading ? (
@@ -132,7 +116,6 @@ const Feed = () => {
         ) : (
           <Stack>
             {posts.map(post => {
-              const isOwner = post.author?.username === user?.username;
               return (
                 <motion.div
                   whileHover={{ scale: 1.02, boxShadow: '0px 4px 20px rgba(0,0,0,0.1)' }}
@@ -176,34 +159,6 @@ const Feed = () => {
                       </IconButton>
                   </motion.div>
                     <Badge colorScheme="blue" size={'lg'}>{post.upvotes}</Badge>
-
-                    {isOwner && (
-                      <>
-                        <IconButton
-                          size="md"
-                          aria-label="Edit"
-                          variant='ghost'
-                          color={'blue.500'}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/edit/${post.id}`, { state: { post } });
-                          }}
-                        >  
-                          <BiEdit />
-                        </IconButton><IconButton
-                          size="md"
-                          aria-label="Delete"
-                          variant='ghost'
-                          color={'red'}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(post.id);
-                          }}
-                        >  
-                          <BiTrash/>
-                        </IconButton>
-                      </>
-                    )}
                   </Stack>
                 </Box>
                 </motion.div>
