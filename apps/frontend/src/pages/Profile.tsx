@@ -13,8 +13,9 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BiSolidUpvote } from "react-icons/bi";
+import { BiEdit, BiSolidUpvote, BiTrash } from "react-icons/bi";
 import { useUpvote } from "../hooks/useUpvote";
+import { useDeletePost } from "../hooks/useDeletePost";
 
 interface UserProfile {
   name: string;
@@ -45,6 +46,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const { username } = useParams();
+  const { deletePost } = useDeletePost();
 
   // Fetch userId if not in state
   useEffect(() => {
@@ -106,6 +108,10 @@ const Profile = () => {
     );
   }
 
+  const handleDelete = (postId:number) => {
+    deletePost(postId, () => navigate('/feed'));
+  };
+
   const joinedDate = new Date(profile.createdAt).toLocaleDateString();
 
   return (
@@ -162,6 +168,33 @@ const Profile = () => {
                     </IconButton>
                   </motion.div>
                   <Badge colorScheme="blue" size="lg">{post.upvotes}</Badge>
+                  {(post.author?.username === user?.username) && (
+                  <>
+                    <IconButton
+                      size="md"
+                      aria-label="Edit"
+                      variant='ghost'
+                      color={'blue.500'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/edit/${post.id}`, { state: { post } });
+                      }}
+                    >  
+                      <BiEdit />
+                    </IconButton><IconButton
+                      size="md"
+                      aria-label="Delete"
+                      variant='ghost'
+                      color={'red'}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(post.id);
+                      }}
+                    >  
+                      <BiTrash/>
+                    </IconButton>
+                  </>
+                )}
                 </Stack>
               </Box>
             </motion.div>

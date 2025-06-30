@@ -42,13 +42,13 @@ router.get('/profile/:id/posts', async (req, res) => {
         title: true,
         content: true,
         updatedAt: true,
-        upvotes: true
+        upvotes: true,
+        author:true
       },
       orderBy: {
         createdAt: 'desc',
       },
     });
-
     res.json(posts);
   } catch (err) {
     console.error(err);
@@ -94,7 +94,6 @@ router.put('/profile/:id/password', async (req, res) => {
 
 router.get('/profile/username-to-id/:username', async (req, res) => {
   const { username } = req.params;
-  console.log("Here ",username)
   try {
     const user = await prisma.user.findUnique({
       where: { username },
