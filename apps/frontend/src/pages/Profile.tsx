@@ -7,10 +7,14 @@ import {
   Spinner,
   Button,
   Image,
+  IconButton,
+  Badge,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import {motion} from 'framer-motion'
+import { BiSolidUpvote } from "react-icons/bi";
+import { useUpvote } from '../hooks/useUpvote';
 
 interface UserProfile {
   name: string;
@@ -20,16 +24,22 @@ interface UserProfile {
 }
 
 interface Post {
-  id: string;
+  id: number;
   title: string;
   content: string;
   updatedAt: string;
+  upvotes: number;
+  author?: {
+    username: string;
+  };
 }
 
 const Profile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const { hasUpvoted, toggleUpvote } = useUpvote();
+
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -74,7 +84,6 @@ const Profile = () => {
 
   const joinedDate = new Date(profile.createdAt);
   const formattedDate = joinedDate.toLocaleDateString();
-  const joinedYear = joinedDate.getFullYear();
 
   return (
     <Box maxW="3xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
@@ -83,7 +92,6 @@ const Profile = () => {
         <Heading size="md">{profile.name}</Heading>
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
         <Text>Joined on: <strong>{formattedDate}</strong></Text>
-        {/* <Text>Year: <strong>{joinedYear}</strong></Text> */}
 
         {user?.id === userId && (
           <Button onClick={() => navigate('/change-password')}>
@@ -107,14 +115,44 @@ const Profile = () => {
               onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
               key={post.id}
             >
-            <Box key={post.id} p={4} mb={4} borderWidth="1px" borderRadius="md">
-              <Heading size="sm">{post.title}</Heading>
-              <Text fontSize="sm" color="gray.600">
-                {new Date(post.updatedAt).toLocaleDateString()}
-              </Text>
-              <Text mt={2}>{post.content}</Text>
-            </Box>
+              <Box 
+                  key={post.id} p={6} bg="white" rounded="md" shadow="sm" 
+                >
+                  <Heading size="sm" mb={2}>
+                    {post.title}
+                  </Heading>
+                  <Text mb={3}>{post.content}</Text>
+                  <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
+                    <Text>by {post.author?.username}</Text>
+                    <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
+                  </Stack>
+
+                  <Stack mt={3} direction="row" align="center">
+                    <motion.div
+                    whileTap={{ scale: 1.3 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    <IconButton
+                    size="xs"
+                    aria-label="Upvote"
+                    variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+                        setPosts(prev =>
+                          prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                        )
+                      );
+                    }}
+                  >
+                    <BiSolidUpvote />
+                  </IconButton>
+                  </motion.div>
+                  <Badge colorScheme="blue" size={"lg"}>{post.upvotes}</Badge>
+                  </Stack>
+                </Box>
             </motion.div>
+            
           ))
         )}
       </Box>

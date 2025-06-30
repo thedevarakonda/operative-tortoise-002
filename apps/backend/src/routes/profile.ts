@@ -42,9 +42,10 @@ router.get('/profile/:id/posts', async (req, res) => {
         title: true,
         content: true,
         updatedAt: true,
+        upvotes: true
       },
       orderBy: {
-        updatedAt: 'desc',
+        createdAt: 'desc',
       },
     });
 
