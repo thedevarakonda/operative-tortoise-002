@@ -57,7 +57,7 @@ const ChangePassword = () => {
         duration: 2000,
       });
 
-      navigate("/profile");
+      navigate(`/profile/${user?.username}`);
 
     } catch (err) {
       console.error(err);
@@ -94,7 +94,7 @@ const ChangePassword = () => {
         >
           Update Password
         </Button>
-        <Button variant="ghost" onClick={() => navigate("/profile")}>
+        <Button variant="ghost" onClick={() => navigate(`/profile/${user?.username}`)}>
           Cancel
         </Button>
       </Stack>
