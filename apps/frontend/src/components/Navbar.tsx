@@ -9,8 +9,7 @@ import {
   Image,
   Button,
   Portal,
-  IconButton,
-  Group
+  IconButton
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
