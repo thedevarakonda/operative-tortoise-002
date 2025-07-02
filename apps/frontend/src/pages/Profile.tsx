@@ -9,6 +9,8 @@ import {
   Image,
   IconButton,
   Badge,
+  Input,
+  Flex,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
@@ -22,6 +24,7 @@ interface UserProfile {
   email: string;
   avatar?: string;
   createdAt: string;
+  bio? : string
 }
 
 interface Post {
@@ -40,7 +43,8 @@ const Profile = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const { hasUpvoted, toggleUpvote } = useUpvote();
-
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [editedBio, setEditedBio] = useState("");
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -122,8 +126,61 @@ const Profile = () => {
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
         <Text>Joined on: <strong>{joinedDate}</strong></Text>
 
-        {user?.id == userId && (
+        {/* {user?.id == userId && (
           <Button onClick={() => navigate('/change-password')}>Edit Password</Button>
+        )} */}
+
+        {user?.id === userId && (
+          <Box w="100%" mt={4}>
+            <Text fontWeight="bold" mb={1}>Bio</Text>
+            {!isEditingBio ? (
+              <Flex align="center" justify="space-between">
+                <Text color="gray.700" flex="1">{profile.bio || "No bio set."}</Text>
+                <IconButton
+                  size="sm"
+                  aria-label="Edit Bio"
+                  onClick={() => {
+                    setEditedBio(profile.bio || "");
+                    setIsEditingBio(true);
+                  }}
+                >
+                  <BiEdit />
+                </IconButton>
+              </Flex>
+            ) : (
+              <Stack spaceX={2}>
+                <Input
+                  value={editedBio}
+                  onChange={(e) => setEditedBio(e.target.value)}
+                  placeholder="Enter your bio..."
+                />
+                <Button
+                  size="sm"
+                  colorScheme="teal"
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`http://localhost:3001/api/profile/${userId}/bio`, {
+                        method: "PUT",
+                        headers: {
+                          "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ bio: editedBio }),
+                      });
+
+                      if (!res.ok) throw new Error("Failed to update bio");
+
+                      setProfile(prev => prev ? { ...prev, bio: editedBio } : prev);
+                      setIsEditingBio(false);
+                    } catch (err) {
+                      console.error("Bio update failed", err);
+                    }
+                  }}
+                >
+                  Save
+                </Button>
+              </Stack>
+            )}
+          </Box>
         )}
         <Button onClick={() => navigate('/feed')}>Back</Button>
       </Stack>

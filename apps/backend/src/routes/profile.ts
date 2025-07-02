@@ -14,6 +14,7 @@ router.get('/profile/:id', async (req, res) => {
       email: true,
       avatar: true,
       createdAt: true,
+      bio: true
     }
   });
   if (!user){
@@ -25,7 +26,8 @@ router.get('/profile/:id', async (req, res) => {
     name: user.username,
     email: user.email,
     avatar: user.avatar,
-    createdAt: user.createdAt
+    createdAt: user.createdAt,
+    bio : user.bio
   });
 });
 
