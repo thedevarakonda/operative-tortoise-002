@@ -167,6 +167,7 @@ const Profile = () => {
                     setEditedBio(profile.bio || "");
                     setIsEditingBio(true);
                   }}
+                  color={'blue.500'}
                 >
                   <BiEdit />
                 </IconButton>
@@ -206,7 +207,7 @@ const Profile = () => {
               onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
               key={post.id}
             >
-              <Box p={6} bg="white" rounded="md" shadow="sm">
+              <Box p={6} bg="white" rounded="md" shadow="sm" mb={6}>
                 <Heading size="sm" mb={2}>{post.title}</Heading>
                 <Text mb={3}>{post.content}</Text>
                 <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
