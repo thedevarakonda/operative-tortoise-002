@@ -94,6 +94,36 @@ router.put('/profile/:id/password', async (req, res) => {
   }
 });
 
+
+router.put('/profile/:id/update-bio', async (req, res) => {
+  const { id } = req.params;
+  const {updatedBio}  = req.body;
+  if (typeof updatedBio !== "string") {
+    res.status(400).json({ error: "Bio must be a string" });
+    return 
+  }
+
+  try {
+    const user = await prisma.user.findUnique({ where: { id } });
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return 
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: { bio: updatedBio },
+    });
+
+    res.status(200).json({ message: "Bio updated successfully", user: updatedUser });
+  } catch (err) {
+    console.error("Error updating bio:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 router.get('/profile/username-to-id/:username', async (req, res) => {
   const { username } = req.params;
   try {
