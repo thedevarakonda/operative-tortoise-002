@@ -116,6 +116,10 @@ const Profile = () => {
     deletePost(postId, () => navigate('/feed'));
   };
 
+  const handleSaveBio = () => {
+    alert("Save bio clicked");
+  }
+
   const joinedDate = new Date(profile.createdAt).toLocaleDateString();
 
   return (
@@ -130,14 +134,16 @@ const Profile = () => {
           <Button onClick={() => navigate('/change-password')}>Edit Password</Button>
         )} */}
 
-        {user?.id === userId && (
-          <Box w="100%" mt={4}>
-            <Text fontWeight="bold" mb={1}>Bio</Text>
-            {!isEditingBio ? (
+        <Box w="100%" mt={4}>
+          <Text fontWeight="bold" mb={1}>Bio</Text>
+
+          {user?.id === userId ? (
+            !isEditingBio ? (
               <Flex align="center" justify="space-between">
                 <Text color="gray.700" flex="1">{profile.bio || "No bio set."}</Text>
                 <IconButton
-                  size="sm"
+                  size="md"
+                  variant={'ghost'}
                   aria-label="Edit Bio"
                   onClick={() => {
                     setEditedBio(profile.bio || "");
@@ -148,40 +154,25 @@ const Profile = () => {
                 </IconButton>
               </Flex>
             ) : (
-              <Stack spaceX={2}>
+              <Flex direction="column" gap={2}>
                 <Input
                   value={editedBio}
                   onChange={(e) => setEditedBio(e.target.value)}
-                  placeholder="Enter your bio..."
                 />
                 <Button
                   size="sm"
                   colorScheme="teal"
-                  onClick={async () => {
-                    try {
-                      const res = await fetch(`http://localhost:3001/api/profile/${userId}/bio`, {
-                        method: "PUT",
-                        headers: {
-                          "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ bio: editedBio }),
-                      });
-
-                      if (!res.ok) throw new Error("Failed to update bio");
-
-                      setProfile(prev => prev ? { ...prev, bio: editedBio } : prev);
-                      setIsEditingBio(false);
-                    } catch (err) {
-                      console.error("Bio update failed", err);
-                    }
-                  }}
+                  onClick={handleSaveBio}
+                  alignSelf="flex-start"
                 >
                   Save
                 </Button>
-              </Stack>
-            )}
-          </Box>
-        )}
+              </Flex>
+            )
+          ) : (
+            <Text color="gray.700">{profile.bio || "No bio set."}</Text>
+          )}
+        </Box>
         <Button onClick={() => navigate('/feed')}>Back</Button>
       </Stack>
 
