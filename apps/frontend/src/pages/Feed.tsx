@@ -101,8 +101,10 @@ const Feed = () => {
   };
 
   return (
+    <>
+    <Navbar/>
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
-      <Navbar/>
+      
 
       <Box maxW="xl" mx="auto">
         <Stack direction="row"  mb={4} justify="center">
@@ -168,6 +170,7 @@ const Feed = () => {
         )}
       </Box>
     </Box>
+    </>
   );
 };
 
