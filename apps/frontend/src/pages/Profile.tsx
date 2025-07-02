@@ -118,22 +118,20 @@ const Profile = () => {
 
   const handleSaveBio = async () => {
     if (!editedBio.trim() || !userId) return;
-
     try {
       const response = await fetch(`http://localhost:3001/api/profile/${userId}/update-bio`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ bio: editedBio }),
+        body: JSON.stringify({ updatedBio: editedBio }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to update bio");
       }
 
-      const updatedProfile = await response.json();
-      setProfile(updatedProfile);
+      profile.bio = editedBio;
       setIsEditingBio(false);
     } catch (error) {
       console.error("Error updating bio:", error);
