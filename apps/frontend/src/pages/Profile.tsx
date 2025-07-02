@@ -116,9 +116,29 @@ const Profile = () => {
     deletePost(postId, () => navigate('/feed'));
   };
 
-  const handleSaveBio = () => {
-    alert("Save bio clicked");
-  }
+  const handleSaveBio = async () => {
+    if (!editedBio.trim() || !userId) return;
+
+    try {
+      const response = await fetch(`http://localhost:3001/api/profile/${userId}/update-bio`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ bio: editedBio }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update bio");
+      }
+
+      const updatedProfile = await response.json();
+      setProfile(updatedProfile);
+      setIsEditingBio(false);
+    } catch (error) {
+      console.error("Error updating bio:", error);
+    }
+  };
 
   const joinedDate = new Date(profile.createdAt).toLocaleDateString();
 
@@ -161,7 +181,6 @@ const Profile = () => {
                 />
                 <Button
                   size="sm"
-                  colorScheme="teal"
                   onClick={handleSaveBio}
                   alignSelf="flex-start"
                 >
