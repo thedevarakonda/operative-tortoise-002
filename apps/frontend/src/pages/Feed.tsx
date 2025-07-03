@@ -8,7 +8,7 @@ import {
   IconButton,
   Spinner,
 } from '@chakra-ui/react';
-import { BiSolidUpvote,BiEdit, BiTrash } from 'react-icons/bi';
+import { BiSolidUpvote} from 'react-icons/bi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -42,12 +42,8 @@ const Feed = () => {
   const { hasUpvoted, toggleUpvote } = useUpvote();
   const location = useLocation();
   const {deletePost} = useDeletePost(); 
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
+  const MotionButton = motion(Button);
+ 
   useEffect(() => {
     if (location.state?.from === 'new') {
       toaster.create({ title: 'Post created successfully 🎉', type: 'success', duration: 2000 });
@@ -85,20 +81,6 @@ const Feed = () => {
     }
   }, [filter, allPosts, user]);
 
-  const handleFilterChange = (type: 'all' | 'mine') => {
-    if (type === filter) return;
-    setFilterLoading(true);
-    setTimeout(() => {
-      setFilter(type);
-      setFilterLoading(false);
-    }, 300);
-  };
-
-  const handleDelete = (postId: number) => {
-    deletePost(postId, () =>
-      setPosts(prev => prev.filter(post => post.id !== postId))
-    );
-  };
 
   return (
     <>
@@ -108,9 +90,18 @@ const Feed = () => {
 
       <Box maxW="xl" mx="auto">
         <Stack direction="row"  mb={4} justify="center">
-          <Button bgColor={'green.500'} color="white" onClick={() => navigate('/new')}>
-            + New Post
-          </Button>
+            <MotionButton
+                bgColor="green.500"
+                color="white"
+                onClick={() => navigate('/new')}
+                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.05 }}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+              >
+                + New Post
+            </MotionButton>
         </Stack>
 
         {loading || filterLoading ? (
