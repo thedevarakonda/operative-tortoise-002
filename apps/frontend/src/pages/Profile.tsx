@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { BiEdit, BiSolidUpvote, BiTrash } from "react-icons/bi";
 import { useUpvote } from "../hooks/useUpvote";
 import { useDeletePost } from "../hooks/useDeletePost";
+import { toaster } from "../components/ui/toaster";
 
 interface UserProfile {
   name: string;
@@ -133,8 +134,22 @@ const Profile = () => {
 
       profile.bio = editedBio;
       setIsEditingBio(false);
+      toaster.create(
+        {
+          title:'Bio Update successful !',
+          type:'success',
+          duration: 1500
+        }
+      )
     } catch (error) {
       console.error("Error updating bio:", error);
+      toaster.create(
+        {
+          title:'Error updating Bio :(',
+          type:'error',
+          duration: 1500
+        }
+      )
     }
   };
 
