@@ -94,7 +94,7 @@ const ChangePassword = () => {
         >
           Update Password
         </Button>
-        <Button variant="ghost" onClick={() => navigate(`/profile/${user?.username}`)}>
+        <Button variant="ghost" onClick={() => navigate(`/settings`)}>
           Cancel
         </Button>
       </Stack>

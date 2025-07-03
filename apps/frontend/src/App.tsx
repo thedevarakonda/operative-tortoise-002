@@ -9,6 +9,7 @@ import EditPost from './pages/EditPost';
 import Profile from './pages/Profile';
 import ChangePassword from './pages/ChangePassword';
 import PostDetail from './pages/PostDetail';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/profile/:username" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
           <Route path="/post/:id" element={<PostDetail />} />
+          <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>

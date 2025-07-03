@@ -75,7 +75,6 @@ const Navbar = () => {
       align="center"
       justify="space-between"
       position="sticky"
-    //   top={-1}
       zIndex={10}
       minH="60px" // Added minimum height for consistency
     >
@@ -94,7 +93,7 @@ const Navbar = () => {
       {/* Search bar */}
       <Flex maxW="400px" flex="1" mx={6}>
         <Input
-          placeholder="Search username..."
+          placeholder="Search for people..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           mr={2}
