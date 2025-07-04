@@ -16,6 +16,7 @@ model User {
   bio       String?
   createdAt DateTime @default(now())
   posts Post[]
+  comments  Comment[] // 👈 Add this line
 }
 
 model Post {
@@ -27,4 +28,17 @@ model Post {
   upvotes   Int      @default(0)
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String   // ← must match User.id type
+  comments  Comment[] // 👈 Add this line
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  post     Post   @relation(fields: [postId], references: [id])
+  postId   Int
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
 }
