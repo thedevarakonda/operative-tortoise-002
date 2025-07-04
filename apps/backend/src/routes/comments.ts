@@ -48,4 +48,29 @@ router.get('/post/:postId/comments', async (req, res) => {
   }
 });
 
+// ✅ Delete a comment
+router.delete('/comments/:commentId', async (req, res) => {
+  const { commentId } = req.params;
+  const { userId } = req.body;
+
+  try {
+    const comment = await prisma.comment.findUnique({ where: { id: parseInt(commentId) } });
+    if (!comment) {
+      res.status(404).json({ error: 'Comment not found' });
+      return;
+    }
+
+    if (comment.authorId !== userId) {
+      res.status(403).json({ error: 'Not authorized to delete this comment' });
+      return;
+    }
+
+    await prisma.comment.delete({ where: { id: parseInt(commentId) } });
+    res.json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ error: 'Failed to delete comment' });
+  }
+});
+
 export default router;
