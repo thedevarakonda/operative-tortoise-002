@@ -151,7 +151,7 @@ const Feed = () => {
                   </Stack>
 
                   <Stack mt={3} direction="row" align="center">
-                    <Stack direction="row" spaceX={-1} align="center">
+                    <Stack direction="row" spaceX={-2} align="center">
                       <motion.div
                         whileTap={{ scale: 1.2 }}
                         transition={{ type: 'spring', stiffness: 300 }}

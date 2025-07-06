@@ -154,26 +154,26 @@ const PostDetail = () => {
 
       {/* Upvote Section */}
       <Stack direction="row" align="center" mt={2}>
-        <motion.div
-          whileTap={{ scale: 1.3 }}
-          transition={{ type: 'spring', stiffness: 300 }}
-        >
-        <IconButton
-          size="sm"
-          aria-label="Upvote"
-          variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
-          // colorScheme="gray"
-          onClick={() =>
-            toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-              setPost({ ...post, upvotes: newUpvotes })
-            )
-          }
-          // onClick={() => handleUpvote(post.id)} // to be implemented
-        >
-          <BiSolidUpvote/>  
-        </IconButton>
-        </motion.div>
-        <Badge colorScheme="blue" size={'lg'}>{post.upvotes}</Badge>
+        <Stack direction="row" spaceX={-2} align="center">
+          <motion.div
+            whileTap={{ scale: 1.2 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+          >
+            <IconButton
+              size="xs"
+              aria-label="Upvote"
+              variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
+              onClick={() =>
+                toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+                  setPost({ ...post, upvotes: newUpvotes })
+                )
+              }
+            >
+              <BiSolidUpvote/>  
+            </IconButton>
+          </motion.div>
+          <Badge size="sm" variant="plain">{post.upvotes}</Badge>
+        </Stack>
         {(post.author.username === user?.username) && (
         <>
           <IconButton
