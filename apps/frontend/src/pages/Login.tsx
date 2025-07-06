@@ -57,7 +57,7 @@ const LoginPage = () => {
       setIsRedirecting(true); // Show spinner
       setTimeout(() => {
         navigate('/feed', { state: { from: 'login' } });
-      }, 2000);
+      }, 1000);
     } catch (err) {
       console.error(err);
       toaster.create({

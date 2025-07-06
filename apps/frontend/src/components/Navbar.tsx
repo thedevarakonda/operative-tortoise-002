@@ -9,7 +9,8 @@ import {
   Image,
   Button,
   Portal,
-  IconButton
+  IconButton,
+  Spinner
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -20,15 +21,38 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
+
+const handleLogout = async () => {
+  const confirmed = window.confirm("Are you sure you want to logout?");
+  if (!confirmed) return;
+
+  setIsLoggingOut(true);
+
+  try {
+    // Add a small delay to ensure the spinner renders
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    await logout();
+
+    // Keep spinner visible for a minimum duration for better UX
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    navigate("/login");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    toaster.create({
+      title: "Logout failed",
+      type: "error",
+      duration: 3000,
+      closable: true,
+    });
+  } finally {
+    setIsLoggingOut(false);
+  }
+};
+
 
   const handleLogoClick = () => {
     navigate("/feed");
@@ -42,7 +66,7 @@ const Navbar = () => {
   };
 
   const handleSettingsClick = () => {
-    navigate("/settings"); // Changed from "/change-password" to "/settings"
+    navigate("/settings"); 
   };
 
   const handleSearch = async () => {
@@ -67,6 +91,23 @@ const Navbar = () => {
   };
 
   return (
+    <>
+     {isLoggingOut && (
+      <Box
+        position="fixed"
+        top={0}
+        left={0}
+        w="100vw"
+        h="100vh"
+        bg="rgba(255, 255, 255, 0.6)"
+        zIndex={9999}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Spinner size="xl" color="teal.500" />
+      </Box>
+    )}
     <Flex
       as="nav"
       bg="white"
@@ -120,16 +161,27 @@ const Navbar = () => {
                     <Menu.Item value="settings" onClick={() => handleSettingsClick()}>
                         Settings
                     </Menu.Item>
-                    <Menu.Item value="logout" color="fg.error"
-                _hover={{ bg: "bg.error", color: "fg.error" }} onClick={() => handleLogout()}>
-                        Logout
+                    <Menu.Item
+                      value="logout"
+                      color="fg.error"
+                      _hover={{ bg: "bg.error", color: "fg.error" }}
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                    >
+                      {isLoggingOut ? (
+                        <Flex align="center">
+                          <Spinner size="xs" mr={2} /> Logging out...
+                        </Flex>
+                      ) : (
+                        "Logout"
+                      )}
                     </Menu.Item>
                 </Menu.Content>
             </Menu.Positioner>
         </Portal>
       </Menu.Root>
     </Flex>
-
+    </>
   );
 };
 
