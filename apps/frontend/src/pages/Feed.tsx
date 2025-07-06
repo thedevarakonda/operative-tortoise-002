@@ -151,40 +151,46 @@ const Feed = () => {
                   </Stack>
 
                   <Stack mt={3} direction="row" align="center">
-                    <motion.div
-                    whileTap={{ scale: 1.2 }}
-                    transition={{ type: 'spring', stiffness: 300 }}
-                  >
-                    <IconButton
-                      size="xs"
-                      aria-label="Upvote"
-                      variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
-                      onClick={(e) =>{
-                        e.stopPropagation();
-                        toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-                          setPosts(prev =>
-                            prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
-                          )
-                        )
-                      }
-                      }
-                    >
-                      <BiSolidUpvote/>
+                    <Stack direction="row" spaceX={-1} align="center">
+                      <motion.div
+                        whileTap={{ scale: 1.2 }}
+                        transition={{ type: 'spring', stiffness: 300 }}
+                      >
+                        <IconButton
+                          size="xs"
+                          aria-label="Upvote"
+                          variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+                              setPosts(prev =>
+                                prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                              )
+                            )
+                          }}
+                        >
+                          <BiSolidUpvote />
+                        </IconButton>
+                      </motion.div>
+                      <Badge size="sm" variant="plain">{post.upvotes}</Badge>
+                    </Stack>
+
+                    {/* Comment group */}
+                    <Stack direction="row" spaceX={-3} align="center">
+                      <IconButton
+                        size="xs"
+                        variant="ghost"
+                        aria-label="Comment"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCommentClick();
+                        }}
+                      >
+                        <BiComment />
+                        <Badge size="sm" variant='plain'>{post.commentCount ?? 0}</Badge>
                       </IconButton>
-                  </motion.div>
-                    <Badge  size={'md'} variant={'plain'}>{post.upvotes}</Badge>
-                    <IconButton 
-                      size='xs' 
-                      variant={'ghost'}
-                      aria-label="Comment"
-                      onClick={(e) =>{
-                        e.stopPropagation();
-                        handleCommentClick();
-                      }}
-                    >
-                      <BiComment/>
-                    </IconButton>
-                    <Badge size={'md'} variant={'plain'}>{post.commentCount ?? 0}</Badge>
+                      
+                    </Stack>
                   </Stack>
                 </Box>
                 </motion.div>
