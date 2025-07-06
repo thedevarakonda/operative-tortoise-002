@@ -48,6 +48,22 @@ router.get('/post/:postId/comments', async (req, res) => {
   }
 });
 
+// ✅ Get comment count for a post
+router.get('/post/:postId/comments/count', async (req, res) => {
+  const { postId } = req.params;
+
+  try {
+    const count = await prisma.comment.count({
+      where: { postId: parseInt(postId) },
+    });
+
+    res.json({ count });
+  } catch (error) {
+    console.error('Error fetching comment count:', error);
+    res.status(500).json({ error: 'Failed to fetch comment count' });
+  }
+});
+
 // ✅ Delete a comment
 router.delete('/comments/:commentId', async (req, res) => {
   const { commentId } = req.params;
