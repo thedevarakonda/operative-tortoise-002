@@ -29,6 +29,7 @@ interface Post {
     username: string;
     avatar?: string;
   };
+  commentCount?: number;
 }
 
 const Feed = () => {
@@ -58,8 +59,24 @@ const Feed = () => {
     const fetchPosts = async () => {
       try {
         const res = await fetch(`http://localhost:3001/api/other-posts/${user?.id}`);
-        const data = await res.json();
-        setAllPosts(data);
+        const data: Post[] = await res.json();
+
+        // Fetch comment counts for each post
+        const postsWithCounts = await Promise.all(
+          data.map(async post => {
+            try {
+              const res = await fetch(`http://localhost:3001/api/post/${post.id}/comments/count`);
+              const countData = await res.json();
+              console.log(countData);
+              return { ...post, commentCount: countData.count };
+            } catch (err) {
+              console.error('Failed to fetch comment count for post', post.id);
+              return { ...post, commentCount: 0 };
+            }
+          })
+        );
+
+        setAllPosts(postsWithCounts);
       } catch (err) {
         console.error('Failed to fetch posts:', err);
       } finally {
@@ -135,7 +152,7 @@ const Feed = () => {
 
                   <Stack mt={3} direction="row" align="center">
                     <motion.div
-                    whileTap={{ scale: 1.3 }}
+                    whileTap={{ scale: 1.2 }}
                     transition={{ type: 'spring', stiffness: 300 }}
                   >
                     <IconButton
@@ -155,7 +172,7 @@ const Feed = () => {
                       <BiSolidUpvote/>
                       </IconButton>
                   </motion.div>
-                    <Badge colorScheme="blue" size={'md'} variant={'plain'}>{post.upvotes}</Badge>
+                    <Badge  size={'md'} variant={'plain'}>{post.upvotes}</Badge>
                     <IconButton 
                       size='xs' 
                       variant={'ghost'}
@@ -167,6 +184,7 @@ const Feed = () => {
                     >
                       <BiComment/>
                     </IconButton>
+                    <Badge size={'md'} variant={'plain'}>{post.commentCount ?? 0}</Badge>
                   </Stack>
                 </Box>
                 </motion.div>

@@ -56,7 +56,7 @@ router.get('/post/:postId/comments/count', async (req, res) => {
     const count = await prisma.comment.count({
       where: { postId: parseInt(postId) },
     });
-
+    console.log(`PostId: ${postId}, Count: ${count}`);
     res.json({ count });
   } catch (error) {
     console.error('Error fetching comment count:', error);
