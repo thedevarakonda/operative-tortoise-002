@@ -7,8 +7,9 @@ import {
   IconButton,
   Badge,
   Spinner,
+  Flex,
 } from "@chakra-ui/react";
-import { BiSolidUpvote,BiEdit,BiTrash } from "react-icons/bi";
+import { BiSolidUpvote,BiEdit,BiTrash,BiArrowBack } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useParams,useNavigate } from "react-router-dom";
 import { useUpvote } from '../hooks/useUpvote';
@@ -101,6 +102,21 @@ const PostDetail = () => {
 
   return (
     <Box maxW="xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
+      {/* Back Button and Title in Same Line */}
+      <Flex align="center" mb={6}>
+        <IconButton
+          variant="ghost"
+          onClick={() => navigate('/feed')}
+          aria-label="Back to Feed"
+          mr={3}
+        >
+          <BiArrowBack />
+        </IconButton>
+        <Heading size="lg" color="teal.600">
+          Post Details
+        </Heading>
+      </Flex>
+
       {/* Title & Avatar */}
       <Stack direction="row" align="center" spaceX={4} mb={4}>
         {post.author.avatar ? (
