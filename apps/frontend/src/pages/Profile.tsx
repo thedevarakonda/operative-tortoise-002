@@ -164,7 +164,7 @@ const Profile = () => {
           onClick={() => navigate('/feed')}
           alignSelf="flex-start"
         >
-          <BiArrowBack></BiArrowBack>
+          <BiArrowBack/>
         </IconButton>
       </Box>
 

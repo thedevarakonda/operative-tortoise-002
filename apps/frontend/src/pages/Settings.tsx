@@ -4,18 +4,31 @@ import {
   Stack,
   Button,
   Text,
-  Flex,
+  IconButton,
+  Flex
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
+import { BiArrowBack } from "react-icons/bi";
 
 const Settings = () => {
   const navigate = useNavigate();
 
   return (
     <Box maxW="xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="lg">
-      <Heading size="lg" mb={6} color="teal.600">
-        Account Settings
-      </Heading>
+      {/* Back Button and Title in Same Line */}
+      <Flex align="center" mb={6}>
+        <IconButton
+          variant="ghost"
+          onClick={() => navigate('/feed')}
+          aria-label="Back to Feed"
+          mr={3}
+        >
+          <BiArrowBack />
+        </IconButton>
+        <Heading size="lg" color="teal.600">
+          Account Settings
+        </Heading>
+      </Flex>
 
       <Stack >
         {/* Profile Info Section (dummy) */}
