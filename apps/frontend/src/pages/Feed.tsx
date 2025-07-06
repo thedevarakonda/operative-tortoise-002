@@ -8,7 +8,7 @@ import {
   IconButton,
   Spinner,
 } from '@chakra-ui/react';
-import { BiSolidUpvote} from 'react-icons/bi';
+import { BiSolidUpvote,BiComment} from 'react-icons/bi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -82,6 +82,10 @@ const Feed = () => {
   }, [filter, allPosts, user]);
 
 
+  const handleCommentClick = () => {
+    alert("Clicked")
+  }
+
   return (
     <>
     <Navbar/>
@@ -137,7 +141,7 @@ const Feed = () => {
                     <IconButton
                       size="xs"
                       aria-label="Upvote"
-                      variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
+                      variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
                       onClick={(e) =>{
                         e.stopPropagation();
                         toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
@@ -151,7 +155,18 @@ const Feed = () => {
                       <BiSolidUpvote/>
                       </IconButton>
                   </motion.div>
-                    <Badge colorScheme="blue" size={'lg'}>{post.upvotes}</Badge>
+                    <Badge colorScheme="blue" size={'md'} variant={'plain'}>{post.upvotes}</Badge>
+                    <IconButton 
+                      size='xs' 
+                      variant={'ghost'}
+                      aria-label="Comment"
+                      onClick={(e) =>{
+                        e.stopPropagation();
+                        handleCommentClick();
+                      }}
+                    >
+                      <BiComment/>
+                    </IconButton>
                   </Stack>
                 </Box>
                 </motion.div>
