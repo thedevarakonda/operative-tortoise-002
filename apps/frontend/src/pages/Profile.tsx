@@ -15,7 +15,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BiEdit, BiSolidUpvote, BiTrash } from "react-icons/bi";
+import { BiEdit, BiSolidUpvote, BiTrash, BiArrowBack } from "react-icons/bi";
 import { useUpvote } from "../hooks/useUpvote";
 import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
@@ -157,6 +157,17 @@ const Profile = () => {
 
   return (
     <Box maxW="3xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
+      {/* Back Button - Top Left */}
+      <Box mb={6}>
+        <IconButton
+          variant="ghost"
+          onClick={() => navigate('/feed')}
+          alignSelf="flex-start"
+        >
+          <BiArrowBack></BiArrowBack>
+        </IconButton>
+      </Box>
+
       <Stack align="center" mb={6}>
         <Image alt={profile.name} src={profile.avatar} borderRadius="full" boxSize="100px" />
         <Heading size="md">{profile.name}</Heading>
@@ -206,7 +217,6 @@ const Profile = () => {
             <Text color="gray.700">{profile.bio || "No bio set."}</Text>
           )}
         </Box>
-        <Button onClick={() => navigate('/feed')}>Back</Button>
       </Stack>
 
       <Box>
