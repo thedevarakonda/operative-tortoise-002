@@ -28,6 +28,16 @@ interface PostDetail {
   };
 }
 
+interface Comment {
+  id: number;
+  content: string;
+  createdAt: string;
+  author: {
+    username: string;
+  };
+}
+
+
 const PostDetail = () => {
   const { id } = useParams();
   const [post, setPost] = useState<PostDetail | null>(null);
@@ -36,6 +46,9 @@ const PostDetail = () => {
   const {user} = useAuth();
   const navigate = useNavigate();
   const { deletePost } = useDeletePost();
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentsLoading, setCommentsLoading] = useState(true);
+
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -50,7 +63,20 @@ const PostDetail = () => {
       }
     };
 
+    const fetchComments = async () => {
+    try {
+      const res = await fetch(`http://localhost:3001/api/post/${id}/comments`);
+      const data = await res.json();
+      setComments(data);
+    } catch (err) {
+      console.error("Failed to fetch comments", err);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
     fetchPost();
+    fetchComments();
   }, [id]);
 
   if (loading) {
@@ -160,6 +186,26 @@ const PostDetail = () => {
         </>
       )}
       </Stack>
+      <Box mt={6}>
+      <Heading size="sm" mb={3}>Comments</Heading>
+      {commentsLoading ? (
+        <Spinner />
+      ) : comments.length === 0 ? (
+        <Text color="gray.500">No comments yet.</Text>
+      ) : (
+        <Stack spaceY={4}>
+          {comments.map(comment => (
+            <Box key={comment.id} p={3} bg="gray.50" borderRadius="md" shadow="sm">
+              <Text fontSize="sm" mb={1}>"{comment.content}"</Text>
+              <Stack direction="row" justify="space-between" fontSize="xs" color="gray.500">
+                <Text>by {comment.author.username}</Text>
+                <Text>{new Date(comment.createdAt).toLocaleString()}</Text>
+              </Stack>
+            </Box>
+          ))}
+        </Stack>
+      )}
+    </Box>
     </Box>
   );
 };
