@@ -8,14 +8,17 @@ import {
   Badge,
   Spinner,
   Flex,
+  Button,
+  Textarea
 } from "@chakra-ui/react";
-import { BiSolidUpvote,BiEdit,BiTrash,BiArrowBack } from "react-icons/bi";
+import { BiSolidUpvote, BiEdit, BiTrash, BiArrowBack, BiPlus } from "react-icons/bi";
 import { useEffect, useState } from "react";
-import { useParams,useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useUpvote } from '../hooks/useUpvote';
 import { motion } from 'framer-motion';
 import { useAuth } from "../context/AuthContext";
 import { useDeletePost } from "../hooks/useDeletePost";
+import { toaster } from "../components/ui/toaster";
 
 interface PostDetail {
   id: number;
@@ -38,18 +41,19 @@ interface Comment {
   };
 }
 
-
 const PostDetail = () => {
   const { id } = useParams();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const { hasUpvoted, toggleUpvote } = useUpvote();
-  const {user} = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { deletePost } = useDeletePost();
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
-
+  const [showCommentForm, setShowCommentForm] = useState(false);
+  const [commentContent, setCommentContent] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -65,20 +69,81 @@ const PostDetail = () => {
     };
 
     const fetchComments = async () => {
-    try {
-      const res = await fetch(`http://localhost:3001/api/post/${id}/comments`);
-      const data = await res.json();
-      setComments(data);
-    } catch (err) {
-      console.error("Failed to fetch comments", err);
-    } finally {
-      setCommentsLoading(false);
-    }
-  };
+      try {
+        const res = await fetch(`http://localhost:3001/api/post/${id}/comments`);
+        const data = await res.json();
+        setComments(data);
+      } catch (err) {
+        console.error("Failed to fetch comments", err);
+      } finally {
+        setCommentsLoading(false);
+      }
+    };
 
     fetchPost();
     fetchComments();
   }, [id]);
+
+  const handleSubmitComment = async () => {
+    if (!commentContent.trim()) {
+      toaster.create({
+        title: "Error",
+        description: "Comment cannot be empty",
+        type: "error",
+        duration: 3000,
+        closable: true,
+      });
+      return;
+    }
+
+    setSubmittingComment(true);
+    try {
+      // This is where you'd make the API call to submit the comment
+      // For now, just simulate the API call
+      const response = await fetch(`http://localhost:3001/api/post/${id}/comments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+        },
+        body: JSON.stringify({
+          content: commentContent,
+        }),
+      });
+
+      if (response.ok) {
+        const newComment = await response.json();
+        setComments([...comments, newComment]);
+        setCommentContent("");
+        setShowCommentForm(false);
+        toaster.create({
+          title: "Success",
+          description: "Comment added successfully",
+          type: "success",
+          duration: 3000,
+          closable: true,
+        });
+      } else {
+        throw new Error('Failed to submit comment');
+      }
+    } catch (err) {
+      console.error("Failed to submit comment", err);
+      toaster.create({
+        title: "Error",
+        description: "Failed to submit comment",
+        type: "error",
+        duration: 3000,
+        closable: true,
+      });
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleCancelComment = () => {
+    setCommentContent("");
+    setShowCommentForm(false);
+  };
 
   if (loading) {
     return (
@@ -169,59 +234,116 @@ const PostDetail = () => {
                 )
               }
             >
-              <BiSolidUpvote/>  
+              <BiSolidUpvote />
             </IconButton>
           </motion.div>
           <Badge size="sm" variant="plain">{post.upvotes}</Badge>
         </Stack>
         {(post.author.username === user?.username) && (
-        <>
-          <IconButton
-            size="md"
-            aria-label="Edit"
-            variant='ghost'
-            color={'blue.500'}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/edit/${post.id}`, { state: { post } });
-            }}
-          >  
-            <BiEdit />
-          </IconButton><IconButton
-            size="md"
-            aria-label="Delete"
-            variant='ghost'
-            color={'red'}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete();
-            }}
-          >  
-            <BiTrash/>
-          </IconButton>
-        </>
-      )}
+          <>
+            <IconButton
+              size="md"
+              aria-label="Edit"
+              variant='ghost'
+              color={'blue.500'}
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/edit/${post.id}`, { state: { post } });
+              }}
+            >
+              <BiEdit />
+            </IconButton>
+            <IconButton
+              size="md"
+              aria-label="Delete"
+              variant='ghost'
+              color={'red'}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
+              <BiTrash />
+            </IconButton>
+          </>
+        )}
       </Stack>
+
+      {/* Comments Section */}
       <Box mt={6}>
-      <Heading size="sm" mb={3}>Comments</Heading>
-      {commentsLoading ? (
-        <Spinner />
-      ) : comments.length === 0 ? (
-        <Text color="gray.500">No comments yet.</Text>
-      ) : (
-        <Stack spaceY={4}>
-          {comments.map(comment => (
-            <Box key={comment.id} p={3} bg="gray.50" borderRadius="md" shadow="sm">
-              <Text fontSize="sm" mb={1}>"{comment.content}"</Text>
-              <Stack direction="row" justify="space-between" fontSize="xs" color="gray.500">
-                <Text>by {comment.author.username}</Text>
-                <Text>{new Date(comment.createdAt).toLocaleString()}</Text>
-              </Stack>
+        <Flex align="center" justify="space-between" mb={3}>
+          <Heading size="sm">Comments</Heading>
+          {user && (
+            <IconButton
+              size="sm"
+              variant="outline"
+              onClick={() => setShowCommentForm(true)}
+              disabled={showCommentForm}
+            >
+              <BiPlus/>
+            </IconButton>
+          )}
+        </Flex>
+
+        {/* Comment Form */}
+        {showCommentForm && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Box mb={4} p={4} bg="gray.50" borderRadius="md" border="1px solid" borderColor="gray.200">
+              <Textarea
+                value={commentContent}
+                onChange={(e) => setCommentContent(e.target.value)}
+                placeholder="Write your comment here..."
+                resize="vertical"
+                minH="100px"
+                mb={3}
+                bg="white"
+              />
+              <Flex gap={2}>
+                <Button
+                  size="sm"
+                  colorScheme="teal"
+                  onClick={handleSubmitComment}
+                  loading={submittingComment}
+                  loadingText="Submitting..."
+                >
+                  Submit
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCancelComment}
+                  disabled={submittingComment}
+                >
+                  Cancel
+                </Button>
+              </Flex>
             </Box>
-          ))}
-        </Stack>
-      )}
-    </Box>
+          </motion.div>
+        )}
+
+        {/* Comments List */}
+        {commentsLoading ? (
+          <Spinner />
+        ) : comments.length === 0 ? (
+          <Text color="gray.500">No comments yet.</Text>
+        ) : (
+          <Stack spaceY={4}>
+            {comments.map(comment => (
+              <Box key={comment.id} p={3} bg="gray.50" borderRadius="md" shadow="sm">
+                <Text fontSize="sm" mb={1}>"{comment.content}"</Text>
+                <Stack direction="row" justify="space-between" fontSize="xs" color="gray.500">
+                  <Text>by {comment.author.username}</Text>
+                  <Text>{new Date(comment.createdAt).toLocaleString()}</Text>
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
     </Box>
   );
 };
