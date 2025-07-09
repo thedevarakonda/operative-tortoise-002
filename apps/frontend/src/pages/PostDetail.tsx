@@ -96,24 +96,34 @@ const PostDetail = () => {
       return;
     }
 
+    if (!user?.id) {
+      toaster.create({
+        title: "Error",
+        description: "You must be logged in to comment",
+        type: "error",
+        duration: 3000,
+        closable: true,
+      });
+      return;
+    }
+
     setSubmittingComment(true);
     try {
-      // This is where you'd make the API call to submit the comment
-      // For now, just simulate the API call
       const response = await fetch(`http://localhost:3001/api/post/${id}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Add authorization header if needed
         },
         body: JSON.stringify({
-          content: commentContent,
+          content: commentContent.trim(),
+          authorId: user.id,
         }),
       });
 
       if (response.ok) {
         const newComment = await response.json();
-        setComments([...comments, newComment]);
+        // Add the new comment to the beginning of the array (since backend orders by createdAt desc)
+        setComments([newComment, ...comments]);
         setCommentContent("");
         setShowCommentForm(false);
         toaster.create({
@@ -124,13 +134,14 @@ const PostDetail = () => {
           closable: true,
         });
       } else {
-        throw new Error('Failed to submit comment');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit comment');
       }
     } catch (err) {
       console.error("Failed to submit comment", err);
       toaster.create({
         title: "Error",
-        description: "Failed to submit comment",
+        description: err instanceof Error ? err.message : "Failed to submit comment",
         type: "error",
         duration: 3000,
         closable: true,
