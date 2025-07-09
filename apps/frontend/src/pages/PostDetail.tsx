@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { BiSolidUpvote, BiEdit, BiTrash, BiArrowBack, BiPlus } from "react-icons/bi";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useUpvote } from '../hooks/useUpvote';
 import { motion } from 'framer-motion';
 import { useAuth } from "../context/AuthContext";
@@ -43,6 +43,7 @@ interface Comment {
 
 const PostDetail = () => {
   const { id } = useParams();
+  const location = useLocation();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const { hasUpvoted, toggleUpvote } = useUpvote();
@@ -83,6 +84,12 @@ const PostDetail = () => {
     fetchPost();
     fetchComments();
   }, [id]);
+
+  useEffect(() => {
+    if (location.state?.openCommentForm && user) {
+      setShowCommentForm(true);
+    }
+  }, [location.state, user]);
 
   const handleSubmitComment = async () => {
     if (!commentContent.trim()) {

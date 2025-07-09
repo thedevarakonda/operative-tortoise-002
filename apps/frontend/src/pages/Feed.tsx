@@ -98,10 +98,24 @@ const Feed = () => {
     }
   }, [filter, allPosts, user]);
 
-
-  const handleCommentClick = () => {
-    alert("Clicked")
-  }
+  const handleCommentClick = (postId: number) => {
+    if (!user) {
+      toaster.create({
+        title: "Error",
+        description: "You must be logged in to comment",
+        type: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Navigate to post detail with flag to open comment form
+    navigate(`/post/${postId}`, { 
+      state: { 
+        openCommentForm: true 
+      } 
+    });
+  };
 
   return (
     <>
@@ -183,7 +197,7 @@ const Feed = () => {
                         aria-label="Comment"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleCommentClick();
+                          handleCommentClick(post.id);
                         }}
                       >
                         <BiComment />

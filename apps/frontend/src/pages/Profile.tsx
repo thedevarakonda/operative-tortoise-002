@@ -174,10 +174,6 @@ const Profile = () => {
         <Text fontSize="sm" color="gray.600">{profile.email}</Text>
         <Text>Joined on: <strong>{joinedDate}</strong></Text>
 
-        {/* {user?.id == userId && (
-          <Button onClick={() => navigate('/change-password')}>Edit Password</Button>
-        )} */}
-
         <Box w="100%" mt={4}>
           <Text fontWeight="bold" mb={1}>Bio</Text>
 
