@@ -8,17 +8,16 @@ import {
   Button,
   Image,
   IconButton,
-  Badge,
   Input,
   Flex,
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BiEdit, BiSolidUpvote, BiTrash, BiArrowBack, BiComment } from "react-icons/bi";
-import { useUpvote } from "../hooks/useUpvote";
+import { BiEdit, BiArrowBack } from "react-icons/bi";
 import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
+import PostActions from "../components/PostActions"; // Import the PostActions component
 
 interface UserProfile {
   name: string;
@@ -44,7 +43,6 @@ const Profile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
-  const { hasUpvoted, toggleUpvote } = useUpvote();
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [editedBio, setEditedBio] = useState("");
   const [loading, setLoading] = useState(true);
@@ -132,6 +130,20 @@ const Profile = () => {
     });
   };
 
+  const handleUpvoteUpdate = (postId: number, newUpvotes: number) => {
+    setPosts(prev =>
+      prev.map(p => (p.id === postId ? { ...p, upvotes: newUpvotes } : p))
+    );
+  };
+
+  const handleEditClick = (post: Post) => {
+    navigate(`/edit/${post.id}`, { state: { post } });
+  };
+
+  const handleDeleteClick = (postId: number) => {
+    deletePost(postId, () => navigate('/feed'));
+  };
+
   if (loading) {
     return (
       <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
@@ -147,10 +159,6 @@ const Profile = () => {
       </Box>
     );
   }
-
-  const handleDelete = (postId:number) => {
-    deletePost(postId, () => navigate('/feed'));
-  };
 
   const handleSaveBio = async () => {
     if (!editedBio.trim() || !userId) return;
@@ -271,74 +279,25 @@ const Profile = () => {
                   <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
                 </Stack>
 
-                <Stack mt={3} direction="row" align="center" justify="space-between">
-                  <Stack direction="row" align="center">
-                    <motion.div whileTap={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 300 }}>
-                      <IconButton
-                        size="xs"
-                        aria-label="Upvote"
-                        variant={hasUpvoted(post.id) ? "solid" : "outline"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-                            setPosts(prev =>
-                              prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
-                            )
-                          );
-                        }}
-                      >
-                        <BiSolidUpvote />
-                      </IconButton>
-                    </motion.div>
-                    <Badge colorScheme="blue" size="lg">{post.upvotes}</Badge>
-                    
-                    {/* Comment Icon and Badge */}
-                    <Stack direction="row" spaceX={-3} align="center">
-                      <IconButton
-                        size="xs"
-                        variant="ghost"
-                        aria-label="Comment"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCommentClick(post.id);
-                        }}
-                      >
-                        <BiComment />
-                        <Badge size="sm" variant='plain'>{post.commentCount ?? 0}</Badge>
-                      </IconButton>
-                    </Stack>
-                  </Stack>
-
-                  {/* Edit and Delete buttons grouped on the right side */}
-                  {(post.author?.username === user?.username) && (
-                    <Stack direction="row" align="center" spaceX={1}>
-                      <IconButton
-                        size="md"
-                        aria-label="Edit"
-                        variant='ghost'
-                        color={'blue.500'}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/edit/${post.id}`, { state: { post } });
-                        }}
-                      >  
-                        <BiEdit />
-                      </IconButton>
-                      <IconButton
-                        size="md"
-                        aria-label="Delete"
-                        variant='ghost'
-                        color={'red'}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(post.id);
-                        }}
-                      >  
-                        <BiTrash/>
-                      </IconButton>
-                    </Stack>
-                  )}
-                </Stack>
+                {/* Replace the entire actions section with PostActions component */}
+                <Box mt={3}>
+                  <PostActions
+                    post={post}
+                    showUpvote={true}
+                    showComment={true}
+                    showEdit={true}
+                    showDelete={true}
+                    onUpvoteUpdate={(newUpvotes) => handleUpvoteUpdate(post.id, newUpvotes)}
+                    onCommentClick={() => handleCommentClick(post.id)}
+                    onEditClick={() => handleEditClick(post)}
+                    onDeleteClick={() => handleDeleteClick(post.id)}
+                    size="xs"
+                    spacing={2}
+                    direction="row"
+                    justify="space-between"
+                    stopPropagation={true}
+                  />
+                </Box>
               </Box>
             </motion.div>
           ))
