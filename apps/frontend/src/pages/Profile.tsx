@@ -271,25 +271,28 @@ const Profile = () => {
                   <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
                 </Stack>
 
-                <Stack mt={3} direction="row" align="center">
-                  <motion.div whileTap={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 300 }}>
-                    <IconButton
-                      size="xs"
-                      aria-label="Upvote"
-                      variant={hasUpvoted(post.id) ? "solid" : "outline"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-                          setPosts(prev =>
-                            prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
-                          )
-                        );
-                      }}
-                    >
-                      <BiSolidUpvote />
-                    </IconButton>
-                  </motion.div>
-                  <Badge colorScheme="blue" size="lg">{post.upvotes}</Badge>
+                <Stack mt={3} direction="row" align="center" justify="space-between">
+                  <Stack direction="row" align="center">
+                    <motion.div whileTap={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 300 }}>
+                      <IconButton
+                        size="xs"
+                        aria-label="Upvote"
+                        variant={hasUpvoted(post.id) ? "solid" : "outline"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
+                            setPosts(prev =>
+                              prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                            )
+                          );
+                        }}
+                      >
+                        <BiSolidUpvote />
+                      </IconButton>
+                    </motion.div>
+                    <Badge colorScheme="blue" size="lg">{post.upvotes}</Badge>
+                    
+                    {/* Comment Icon and Badge */}
                     <Stack direction="row" spaceX={-3} align="center">
                       <IconButton
                         size="xs"
@@ -303,36 +306,38 @@ const Profile = () => {
                         <BiComment />
                         <Badge size="sm" variant='plain'>{post.commentCount ?? 0}</Badge>
                       </IconButton>
-                      
                     </Stack>
+                  </Stack>
+
+                  {/* Edit and Delete buttons grouped on the right side */}
                   {(post.author?.username === user?.username) && (
-                  <>
-                    <IconButton
-                      size="md"
-                      aria-label="Edit"
-                      variant='ghost'
-                      color={'blue.500'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/edit/${post.id}`, { state: { post } });
-                      }}
-                    >  
-                      <BiEdit />
-                    </IconButton>
-                    <IconButton
-                      size="md"
-                      aria-label="Delete"
-                      variant='ghost'
-                      color={'red'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(post.id);
-                      }}
-                    >  
-                      <BiTrash/>
-                    </IconButton>
-                  </>
-                )}
+                    <Stack direction="row" align="center" spaceX={1}>
+                      <IconButton
+                        size="md"
+                        aria-label="Edit"
+                        variant='ghost'
+                        color={'blue.500'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/edit/${post.id}`, { state: { post } });
+                        }}
+                      >  
+                        <BiEdit />
+                      </IconButton>
+                      <IconButton
+                        size="md"
+                        aria-label="Delete"
+                        variant='ghost'
+                        color={'red'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(post.id);
+                        }}
+                      >  
+                        <BiTrash/>
+                      </IconButton>
+                    </Stack>
+                  )}
                 </Stack>
               </Box>
             </motion.div>
