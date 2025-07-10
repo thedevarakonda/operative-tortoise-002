@@ -15,7 +15,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { BiEdit, BiSolidUpvote, BiTrash, BiArrowBack } from "react-icons/bi";
+import { BiEdit, BiSolidUpvote, BiTrash, BiArrowBack, BiComment } from "react-icons/bi";
 import { useUpvote } from "../hooks/useUpvote";
 import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
@@ -96,6 +96,25 @@ const Profile = () => {
 
     if (userId) fetchProfileAndPosts();
   }, [userId]);
+
+  const handleCommentClick = (postId: number) => {
+    if (!user) {
+      toaster.create({
+        title: "Error",
+        description: "You must be logged in to comment",
+        type: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Navigate to post detail with flag to open comment form
+    navigate(`/post/${postId}`, { 
+      state: { 
+        openCommentForm: true 
+      } 
+    });
+  };
 
   if (loading) {
     return (
@@ -255,6 +274,20 @@ const Profile = () => {
                     </IconButton>
                   </motion.div>
                   <Badge colorScheme="blue" size="lg">{post.upvotes}</Badge>
+                    <Stack direction="row" spaceX={-3} align="center">
+                      <IconButton
+                        size="xs"
+                        variant="ghost"
+                        aria-label="Comment"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCommentClick(post.id);
+                        }}
+                      >
+                        <BiComment />
+                        <Badge size="sm" variant='plain'>{post.commentCount ?? 0}</Badge>
+                      </IconButton>
+                    </Stack>
                   {(post.author?.username === user?.username) && (
                   <>
                     <IconButton
