@@ -4,19 +4,15 @@ import {
   Text,
   Stack,
   Button,
-  Badge,
-  IconButton,
   Spinner,
 } from '@chakra-ui/react';
-import { BiSolidUpvote,BiComment} from 'react-icons/bi';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toaster } from '../components/ui/toaster';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
-import { useUpvote } from '../hooks/useUpvote';
-import { useDeletePost } from '../hooks/useDeletePost';
+import PostActions from '../components/PostActions';
 
 interface Post {
   id: number;
@@ -40,9 +36,7 @@ const Feed = () => {
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const [filterLoading, setFilterLoading] = useState(false);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const { hasUpvoted, toggleUpvote } = useUpvote();
   const location = useLocation();
-  const {deletePost} = useDeletePost(); 
   const MotionButton = motion(Button);
  
   useEffect(() => {
@@ -121,8 +115,6 @@ const Feed = () => {
     <>
     <Navbar/>
     <Box minH="100vh" bg="gray.100" py={12} px={4}>
-      
-
       <Box maxW="xl" mx="auto">
         <Stack direction="row"  mb={4} justify="center">
             <MotionButton
@@ -164,48 +156,22 @@ const Feed = () => {
                     <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
                   </Stack>
 
-                  <Stack mt={3} direction="row" align="center">
-                    <Stack direction="row" spaceX={-2} align="center">
-                      <motion.div
-                        whileTap={{ scale: 1.2 }}
-                        transition={{ type: 'spring', stiffness: 300 }}
-                      >
-                        <IconButton
-                          size="xs"
-                          aria-label="Upvote"
-                          variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-                              setPosts(prev =>
-                                prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
-                              )
-                            )
-                          }}
-                        >
-                          <BiSolidUpvote />
-                        </IconButton>
-                      </motion.div>
-                      <Badge size="sm" variant="plain">{post.upvotes}</Badge>
-                    </Stack>
-
-                    {/* Comment group */}
-                    <Stack direction="row" spaceX={-3} align="center">
-                      <IconButton
-                        size="xs"
-                        variant="ghost"
-                        aria-label="Comment"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCommentClick(post.id);
-                        }}
-                      >
-                        <BiComment />
-                        <Badge size="sm" variant='plain'>{post.commentCount ?? 0}</Badge>
-                      </IconButton>
-                      
-                    </Stack>
-                  </Stack>
+                  {/* REPLACED: All the action buttons with PostActions component */}
+                  <Box mt={3}>
+                    <PostActions
+                      post={post}
+                      showUpvote={true}
+                      showComment={true}
+                      showEdit={false}
+                      showDelete={false}
+                      onUpvoteUpdate={(newUpvotes) =>
+                        setPosts(prev =>
+                          prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                        )
+                      }
+                      onCommentClick={() => handleCommentClick(post.id)}
+                    />
+                  </Box>
                 </Box>
                 </motion.div>
               );
