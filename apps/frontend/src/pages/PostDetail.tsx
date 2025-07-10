@@ -5,20 +5,19 @@ import {
   Stack,
   Image,
   IconButton,
-  Badge,
   Spinner,
   Flex,
   Button,
   Textarea
 } from "@chakra-ui/react";
-import { BiSolidUpvote, BiEdit, BiTrash, BiArrowBack, BiPlus } from "react-icons/bi";
+import { BiArrowBack, BiPlus } from "react-icons/bi";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useUpvote } from '../hooks/useUpvote';
 import { motion } from 'framer-motion';
 import { useAuth } from "../context/AuthContext";
 import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
+import PostActions from "../components/PostActions"; // Import the PostActions component
 
 interface PostDetail {
   id: number;
@@ -46,7 +45,6 @@ const PostDetail = () => {
   const location = useLocation();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const { hasUpvoted, toggleUpvote } = useUpvote();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { deletePost } = useDeletePost();
@@ -163,6 +161,37 @@ const PostDetail = () => {
     setShowCommentForm(false);
   };
 
+  const handleUpvoteUpdate = (newUpvotes: number) => {
+    if (post) {
+      setPost({ ...post, upvotes: newUpvotes });
+    }
+  };
+
+  const handleEditClick = () => {
+    if (post) {
+      navigate(`/edit/${post.id}`, { state: { post } });
+    }
+  };
+
+  const handleDeleteClick = () => {
+    if (post) {
+      deletePost(post.id, () => navigate('/feed'));
+    }
+  };
+
+  const handleCommentClick = () => {
+    if (!user) {
+      toaster.create({
+        title: "Error",
+        description: "You must be logged in to comment",
+        type: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    setShowCommentForm(true);
+  };
+
   if (loading) {
     return (
       <Box minH="100vh" display="flex" alignItems="center" justifyContent="center" bg="gray.50">
@@ -179,8 +208,14 @@ const PostDetail = () => {
     );
   }
 
-  const handleDelete = () => {
-    deletePost(post.id, () => navigate('/feed'));
+  // Create a post object that matches the PostActions interface
+  const postForActions = {
+    id: post.id,
+    upvotes: post.upvotes,
+    author: {
+      username: post.author.username,
+    },
+    commentCount: comments.length, // Use the actual comments count
   };
 
   return (
@@ -235,57 +270,25 @@ const PostDetail = () => {
         <Text>{new Date(post.createdAt).toLocaleString()}</Text>
       </Stack>
 
-      {/* Upvote Section */}
-      <Stack direction="row" align="center" mt={2}>
-        <Stack direction="row" spaceX={-2} align="center">
-          <motion.div
-            whileTap={{ scale: 1.2 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
-            <IconButton
-              size="xs"
-              aria-label="Upvote"
-              variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
-              onClick={() =>
-                toggleUpvote(post.id, post.upvotes, (newUpvotes) =>
-                  setPost({ ...post, upvotes: newUpvotes })
-                )
-              }
-            >
-              <BiSolidUpvote />
-            </IconButton>
-          </motion.div>
-          <Badge size="sm" variant="plain">{post.upvotes}</Badge>
-        </Stack>
-        {(post.author.username === user?.username) && (
-          <>
-            <IconButton
-              size="md"
-              aria-label="Edit"
-              variant='ghost'
-              color={'blue.500'}
-              onClick={(e) => {
-                e.stopPropagation();
-                navigate(`/edit/${post.id}`, { state: { post } });
-              }}
-            >
-              <BiEdit />
-            </IconButton>
-            <IconButton
-              size="md"
-              aria-label="Delete"
-              variant='ghost'
-              color={'red'}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete();
-              }}
-            >
-              <BiTrash />
-            </IconButton>
-          </>
-        )}
-      </Stack>
+      {/* Post Actions - Replace the entire actions section */}
+      <Box mt={2}>
+        <PostActions
+          post={postForActions}
+          showUpvote={true}
+          showComment={false}
+          showEdit={true}
+          showDelete={true}
+          onUpvoteUpdate={handleUpvoteUpdate}
+          onCommentClick={handleCommentClick}
+          onEditClick={handleEditClick}
+          onDeleteClick={handleDeleteClick}
+          size="xs"
+          spacing={2}
+          direction="row"
+          justify="flex-start"
+          stopPropagation={false} // No need to stop propagation in detail view
+        />
+      </Box>
 
       {/* Comments Section */}
       <Box mt={6}>
