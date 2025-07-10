@@ -37,6 +37,7 @@ interface Post {
   author?: {
     username: string;
   };
+  commentCount?: number;
 }
 
 const Profile = () => {
@@ -86,7 +87,22 @@ const Profile = () => {
 
         const postsRes = await fetch(`http://localhost:3001/api/profile/${userId}/posts`);
         const postsData = await postsRes.json();
-        setPosts(postsData);
+
+        // Fetch comment counts for each post
+        const postsWithCommentCounts = await Promise.all(
+          postsData.map(async (post: Post) => {
+            try {
+              const commentCountRes = await fetch(`http://localhost:3001/api/post/${post.id}/comments/count`);
+              const commentCountData = await commentCountRes.json();
+              return { ...post, commentCount: commentCountData.count || 0 };
+            } catch (error) {
+              console.error(`Failed to fetch comment count for post ${post.id}:`, error);
+              return { ...post, commentCount: 0 };
+            }
+          })
+        );
+
+        setPosts(postsWithCommentCounts);
       } catch (err) {
         console.error("Failed to fetch profile or posts", err);
       } finally {
@@ -107,7 +123,7 @@ const Profile = () => {
       });
       return;
     }
-    
+
     // Navigate to post detail with flag to open comment form
     navigate(`/post/${postId}`, { 
       state: { 
@@ -287,6 +303,7 @@ const Profile = () => {
                         <BiComment />
                         <Badge size="sm" variant='plain'>{post.commentCount ?? 0}</Badge>
                       </IconButton>
+                      
                     </Stack>
                   {(post.author?.username === user?.username) && (
                   <>
@@ -301,7 +318,8 @@ const Profile = () => {
                       }}
                     >  
                       <BiEdit />
-                    </IconButton><IconButton
+                    </IconButton>
+                    <IconButton
                       size="md"
                       aria-label="Delete"
                       variant='ghost'
