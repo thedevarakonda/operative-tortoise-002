@@ -29,51 +29,51 @@ interface Post {
 }
 
 const Feed = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const MotionButton = motion(Button);
+
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const [filterLoading, setFilterLoading] = useState(false);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
-  const location = useLocation();
-  const MotionButton = motion(Button);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPosts, setTotalPosts] = useState(0);
-  const POSTS_PER_PAGE = 5; // or any limit you prefer
- 
+  const [totalPages, setTotalPages] = useState(1);
+  const POSTS_PER_PAGE = 5;
+
   useEffect(() => {
     if (location.state?.from === 'new') {
       toaster.create({ title: 'Post created successfully 🎉', type: 'success', duration: 2000 });
     } else if (location.state?.from === 'login') {
       toaster.create({ title: `Welcome back, ${user?.username}!`, type: 'success', duration: 2000 });
     } else if (location.state?.from === 'edit') {
-      toaster.create({ title: `Post edited successfully !`, type: 'success', duration: 2000 });
+      toaster.create({ title: `Post edited successfully!`, type: 'success', duration: 2000 });
     }
   }, []);
 
   const fetchPosts = async (page = 1) => {
-  setFilterLoading(true);
-  try {
-    const res = await fetch(
-      `http://localhost:3001/api/other-posts/${user?.id}?page=${page}&limit=${POSTS_PER_PAGE}`
-    );
-    const { posts, total } = await res.json();
+    setFilterLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3001/api/other-posts/${user?.id}?page=${page}&limit=${POSTS_PER_PAGE}`);
+      const { posts, total } = await res.json();
 
-    const postsWithCounts = await Promise.all(
-      posts.map(async post => {
-        try {
-          const res = await fetch(`http://localhost:3001/api/post/${post.id}/comments/count`);
-          const countData = await res.json();
-          return { ...post, commentCount: countData.count };
-        } catch {
-          return { ...post, commentCount: 0 };
-        }
-      })
-    );
+      const postsWithCounts = await Promise.all(
+        posts.map(async post => {
+          try {
+            const res = await fetch(`http://localhost:3001/api/post/${post.id}/comments/count`);
+            const countData = await res.json();
+            return { ...post, commentCount: countData.count };
+          } catch {
+            return { ...post, commentCount: 0 };
+          }
+        })
+      );
 
       setAllPosts(postsWithCounts);
-      setTotalPosts(total);
+      setTotalPages(Math.ceil(total / POSTS_PER_PAGE));
     } catch (err) {
       console.error('Failed to fetch posts:', err);
     } finally {
@@ -82,15 +82,11 @@ const Feed = () => {
     }
   };
 
-
   useEffect(() => {
-  if (user?.id) {
-    fetchPosts(currentPage); // Call the function with currentPage
-  }
-}, [user?.id, currentPage]);
-
-
-
+    if (user?.id) {
+      fetchPosts(currentPage);
+    }
+  }, [user?.id, currentPage]);
 
   useEffect(() => {
     if (filter === 'all') {
@@ -100,6 +96,10 @@ const Feed = () => {
       setPosts(userPosts);
     }
   }, [filter, allPosts, user]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
   const handleCommentClick = (postId: number) => {
     if (!user) {
@@ -111,41 +111,39 @@ const Feed = () => {
       });
       return;
     }
-    
-    // Navigate to post detail with flag to open comment form
-    navigate(`/post/${postId}`, { 
-      state: { 
-        openCommentForm: true 
-      } 
+
+    navigate(`/post/${postId}`, {
+      state: {
+        openCommentForm: true
+      }
     });
   };
 
   return (
     <>
-    <Navbar/>
-    <Box minH="100vh" bg="gray.100" py={12} px={4}>
-      <Box maxW="xl" mx="auto">
-        <Stack direction="row"  mb={4} justify="center">
+      <Navbar />
+      <Box minH="100vh" bg="gray.100" py={12} px={4}>
+        <Box maxW="xl" mx="auto">
+          <Stack direction="row" mb={4} justify="center">
             <MotionButton
-                bgColor="green.500"
-                color="white"
-                onClick={() => navigate('/new')}
-                whileTap={{ scale: 0.95 }}
-                whileHover={{ scale: 1.05 }}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-              >
-                + New Post
+              bgColor="green.500"
+              color="white"
+              onClick={() => navigate('/new')}
+              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.05 }}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            >
+              + New Post
             </MotionButton>
-        </Stack>
+          </Stack>
 
-        {loading || filterLoading ? (
-          <Spinner />
-        ) : (
-          <Stack>
-            {posts.map(post => {
-              return (
+          {loading || filterLoading ? (
+            <Spinner />
+          ) : (
+            <Stack>
+              {posts.map(post => (
                 <motion.div
                   whileHover={{ scale: 1.02, boxShadow: '0px 4px 20px rgba(0,0,0,0.1)' }}
                   whileTap={{ scale: 0.98 }}
@@ -153,42 +151,53 @@ const Feed = () => {
                   onClick={() => navigate(`/post/${post.id}`, { state: { post } })}
                   key={post.id}
                 >
-                <Box 
-                  key={post.id} p={6} bg="white" rounded="md" shadow="sm" 
-                >
-                  <Heading size="sm" mb={2}>
-                    {post.title}
-                  </Heading>
-                  <Text mb={3}>{post.content}</Text>
-                  <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
-                    <Text>by {post.author?.username}</Text>
-                    <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
-                  </Stack>
-
-                  {/* REPLACED: All the action buttons with PostActions component */}
-                  <Box mt={3}>
-                    <PostActions
-                      post={post}
-                      showUpvote={true}
-                      showComment={true}
-                      showEdit={false}
-                      showDelete={false}
-                      onUpvoteUpdate={(newUpvotes) =>
-                        setPosts(prev =>
-                          prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
-                        )
-                      }
-                      onCommentClick={() => handleCommentClick(post.id)}
-                    />
+                  <Box p={6} bg="white" rounded="md" shadow="sm">
+                    <Heading size="sm" mb={2}>{post.title}</Heading>
+                    <Text mb={3}>{post.content}</Text>
+                    <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
+                      <Text>by {post.author?.username}</Text>
+                      <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
+                    </Stack>
+                    <Box mt={3}>
+                      <PostActions
+                        post={post}
+                        showUpvote={true}
+                        showComment={true}
+                        showEdit={false}
+                        showDelete={false}
+                        onUpvoteUpdate={(newUpvotes) =>
+                          setPosts(prev =>
+                            prev.map(p => (p.id === post.id ? { ...p, upvotes: newUpvotes } : p))
+                          )
+                        }
+                        onCommentClick={() => handleCommentClick(post.id)}
+                      />
+                    </Box>
                   </Box>
-                </Box>
                 </motion.div>
-              );
-            })}
-          </Stack>
-        )}
+              ))}
+            </Stack>
+          )}
+
+          {totalPages > 1 && (
+            <Stack direction="row" justify="center" mt={6} spaceX={4}>
+              <Button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Text alignSelf="center">Page {currentPage} of {totalPages}</Text>
+              <Button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </Stack>
+          )}
+        </Box>
       </Box>
-    </Box>
     </>
   );
 };
