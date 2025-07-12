@@ -5,6 +5,7 @@ import {
   Stack,
   Button,
   Spinner,
+  IconButton,
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -13,6 +14,7 @@ import { toaster } from '../components/ui/toaster';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import PostActions from '../components/PostActions';
+import { TbArrowBigLeftLine,TbArrowBigRightLine } from "react-icons/tb";
 
 interface Post {
   id: number;
@@ -181,19 +183,21 @@ const Feed = () => {
 
           {totalPages > 1 && (
             <Stack direction="row" justify="center" mt={6} spaceX={4}>
-              <Button
+              <IconButton
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
+                variant='plain'
               >
-                Previous
-              </Button>
+                <TbArrowBigLeftLine />
+              </IconButton>
               <Text alignSelf="center">Page {currentPage} of {totalPages}</Text>
-              <Button
+              <IconButton
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
+                variant='plain'
               >
-                Next
-              </Button>
+                <TbArrowBigRightLine/>
+              </IconButton>
             </Stack>
           )}
         </Box>
