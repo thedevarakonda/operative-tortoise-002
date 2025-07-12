@@ -75,11 +75,24 @@ router.get('/posts', async (_req, res) => {
   }
 });
 
-// Get all posts except those of the logged-in user
+// Get paginated posts except those of the logged-in user
 router.get('/other-posts/:userId', async (req, res) => {
   const { userId } = req.params;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 5;
+  const skip = (page - 1) * limit;
 
   try {
+    // Get total count first
+    const total = await prisma.post.count({
+      where: {
+        authorId: {
+          not: userId,
+        },
+      },
+    });
+
+    // Fetch paginated posts
     const posts = await prisma.post.findMany({
       where: {
         authorId: {
@@ -87,6 +100,8 @@ router.get('/other-posts/:userId', async (req, res) => {
         },
       },
       orderBy: { updatedAt: 'desc' },
+      skip,
+      take: limit,
       include: {
         author: {
           select: { id: true, username: true, avatar: true },
@@ -94,12 +109,13 @@ router.get('/other-posts/:userId', async (req, res) => {
       },
     });
 
-    res.json(posts);
+    res.json({ posts, total });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 });
+
 
 
 router.get('/posts/:id', async (req, res) => {
