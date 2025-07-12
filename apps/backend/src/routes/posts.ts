@@ -31,8 +31,6 @@ router.post('/posts/:id/unvote', async (req, res) => {
   }
 });
 
-
-
 // Create a new post
 router.post('/posts', async (req, res) => {
   const { title, content, authorId } = req.body;
@@ -115,7 +113,6 @@ router.get('/other-posts/:userId', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch posts' });
   }
 });
-
 
 
 router.get('/posts/:id', async (req, res) => {

@@ -38,6 +38,9 @@ const Feed = () => {
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const location = useLocation();
   const MotionButton = motion(Button);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const POSTS_PER_PAGE = 5; // or any limit you prefer
  
   useEffect(() => {
     if (location.state?.from === 'new') {
@@ -49,39 +52,45 @@ const Feed = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await fetch(`http://localhost:3001/api/other-posts/${user?.id}`);
-        const data: Post[] = await res.json();
+  const fetchPosts = async (page = 1) => {
+  setFilterLoading(true);
+  try {
+    const res = await fetch(
+      `http://localhost:3001/api/other-posts/${user?.id}?page=${page}&limit=${POSTS_PER_PAGE}`
+    );
+    const { posts, total } = await res.json();
 
-        // Fetch comment counts for each post
-        const postsWithCounts = await Promise.all(
-          data.map(async post => {
-            try {
-              const res = await fetch(`http://localhost:3001/api/post/${post.id}/comments/count`);
-              const countData = await res.json();
-              console.log(countData);
-              return { ...post, commentCount: countData.count };
-            } catch (err) {
-              console.error('Failed to fetch comment count for post', post.id);
-              return { ...post, commentCount: 0 };
-            }
-          })
-        );
+    const postsWithCounts = await Promise.all(
+      posts.map(async post => {
+        try {
+          const res = await fetch(`http://localhost:3001/api/post/${post.id}/comments/count`);
+          const countData = await res.json();
+          return { ...post, commentCount: countData.count };
+        } catch {
+          return { ...post, commentCount: 0 };
+        }
+      })
+    );
 
-        setAllPosts(postsWithCounts);
-      } catch (err) {
-        console.error('Failed to fetch posts:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user?.id) {
-      fetchPosts();
+      setAllPosts(postsWithCounts);
+      setTotalPosts(total);
+    } catch (err) {
+      console.error('Failed to fetch posts:', err);
+    } finally {
+      setLoading(false);
+      setFilterLoading(false);
     }
-  }, [user?.id]);
+  };
+
+
+  useEffect(() => {
+  if (user?.id) {
+    fetchPosts(currentPage); // Call the function with currentPage
+  }
+}, [user?.id, currentPage]);
+
+
+
 
   useEffect(() => {
     if (filter === 'all') {
