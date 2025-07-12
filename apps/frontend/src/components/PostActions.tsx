@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Stack,
   IconButton,
   Badge,
   Flex,
@@ -76,52 +75,54 @@ const PostActions: React.FC<PostActionsProps> = ({
   const isOwner = post.author?.username === user?.username;
 
   return (
-    <Stack
+    <Flex
       direction={direction}
       align="center"
-      justify={justify}
-      spaceX={spacing}
+      justify="space-between"
+      gap={spacing}
+      w="100%"
     >
-      {/* Upvote Section */}
-      {showUpvote && (
-        <Flex align="center" gap={1}>
-          <motion.div
-            whileTap={{ scale: 1.2 }}
-            transition={{ type: 'spring', stiffness: 300 }}
-          >
+      {/* Left Actions (Upvote & Comment) */}
+      <Flex align="center" gap={spacing}>
+        {showUpvote && (
+          <Flex align="center" gap={1}>
+            <motion.div
+              whileTap={{ scale: 1.2 }}
+              transition={{ type: 'spring', stiffness: 300 }}
+            >
+              <IconButton
+                size={size}
+                aria-label="Upvote"
+                variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
+                onClick={handleUpvote}
+              >
+                <BiSolidUpvote />
+              </IconButton>
+            </motion.div>
+            <Badge size="sm" variant="plain">
+              {post.upvotes}
+            </Badge>
+          </Flex>
+        )}
+
+        {showComment && (
+          <Flex align="center" gap={1}>
             <IconButton
               size={size}
-              aria-label="Upvote"
-              variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
-              onClick={handleUpvote}
+              variant="ghost"
+              aria-label="Comment"
+              onClick={handleClick(onCommentClick)}
             >
-              <BiSolidUpvote />
+              <BiComment />
             </IconButton>
-          </motion.div>
-          <Badge size="sm" variant="plain">
-            {post.upvotes}
-          </Badge>
-        </Flex>
-      )}
+            <Badge size="sm" variant="plain">
+              {post.commentCount ?? 0}
+            </Badge>
+          </Flex>
+        )}
+      </Flex>
 
-      {/* Comment Section */}
-      {showComment && (
-        <Flex align="center" gap={1}>
-          <IconButton
-            size={size}
-            variant="ghost"
-            aria-label="Comment"
-            onClick={handleClick(onCommentClick)}
-          >
-            <BiComment />
-          </IconButton>
-          <Badge size="sm" variant="plain">
-            {post.commentCount ?? 0}
-          </Badge>
-        </Flex>
-      )}
-
-      {/* Edit and Delete Section - Only show if user owns the post */}
+      {/* Right Actions (Edit/Delete) */}
       {isOwner && (
         <Flex align="center" gap={1}>
           {showEdit && (
@@ -135,7 +136,7 @@ const PostActions: React.FC<PostActionsProps> = ({
               <BiEdit />
             </IconButton>
           )}
-          
+
           {showDelete && (
             <IconButton
               size={size}
@@ -149,7 +150,7 @@ const PostActions: React.FC<PostActionsProps> = ({
           )}
         </Flex>
       )}
-    </Stack>
+    </Flex>
   );
 };
 
