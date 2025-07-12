@@ -274,19 +274,10 @@ const PostDetail = () => {
       <Box mt={2}>
         <PostActions
           post={postForActions}
-          showUpvote={true}
-          showComment={false}
-          showEdit={true}
-          showDelete={true}
           onUpvoteUpdate={handleUpvoteUpdate}
           onCommentClick={handleCommentClick}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
-          size="xs"
-          spacing={2}
-          direction="row"
-          justify="flex-start"
-          stopPropagation={false} // No need to stop propagation in detail view
         />
       </Box>
 
