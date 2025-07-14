@@ -6,13 +6,14 @@ import {
   Textarea,
   Heading,
   Stack,
-  Spinner
+  Spinner,
+  Flex,
+  IconButton
 } from '@chakra-ui/react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toaster } from '../components/ui/toaster'; 
-
-// const toaster = createToaster({ placement: '  top' });
+import { BiArrowBack } from 'react-icons/bi';
 
 const NewPost = () => {
   const [title, setTitle] = useState('');
@@ -92,30 +93,44 @@ const NewPost = () => {
 }
 
   return (
-    <Box maxW="lg" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
-      <Heading mb={6}>Create a New Post</Heading>
-      <Stack>
-        <Input
-          placeholder="Post Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <Textarea
-          placeholder="Write your content here..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={6}
-        />
-        <Button
-          colorScheme="teal"
-          onClick={handleSubmit}
-          loading={isSubmitting}
-        >
-          Publish
-        </Button>
-      </Stack>
-    </Box>
-  );
+  <Box maxW="lg" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
+    <Flex align="center" mb={6}>
+      <IconButton
+        variant="ghost"
+        onClick={() => navigate('/feed')}
+        aria-label="Back to Feed"
+        mr={3}
+      >
+        <BiArrowBack />
+      </IconButton>
+      <Heading size="lg" color="teal.600">
+        Create a New Post
+      </Heading>
+    </Flex>
+    
+    <Stack>
+      <Input
+        placeholder="Post Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <Textarea
+        placeholder="Write your content here..."
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        rows={6}
+      />
+      <Button
+        colorScheme="teal"
+        onClick={handleSubmit}
+        loading={isSubmitting}
+      >
+        Publish
+      </Button>
+    </Stack>
+  </Box>
+);
+
 };
 
 export default NewPost;
