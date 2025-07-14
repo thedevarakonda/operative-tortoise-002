@@ -15,6 +15,7 @@ import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import PostActions from '../components/PostActions';
 import { TbArrowBigLeftLine,TbArrowBigRightLine } from "react-icons/tb";
+import { formatDistanceToNow } from 'date-fns';
 
 interface Post {
   id: number;
@@ -158,7 +159,7 @@ const Feed = () => {
                     <Text mb={3}>{post.content}</Text>
                     <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
                       <Text>by {post.author?.username}</Text>
-                      <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
+                      <Text>{formatDistanceToNow(new Date(post.updatedAt), { addSuffix: true })}</Text>
                     </Stack>
                     <Box mt={3}>
                       <PostActions
