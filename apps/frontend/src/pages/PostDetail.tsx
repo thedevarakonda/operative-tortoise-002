@@ -19,6 +19,7 @@ import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
 import PostActions from "../components/PostActions"; // Import the PostActions component
 import { formatDistanceToNow } from "date-fns";
+import Comments from "../components/Comments";
 
 interface PostDetail {
   id: number;
@@ -283,80 +284,7 @@ const PostDetail = () => {
       </Box>
 
       {/* Comments Section */}
-      <Box mt={6}>
-        <Flex align="center" justify="space-between" mb={3}>
-          <Heading size="sm">Comments</Heading>
-          {user && (
-            <IconButton
-              size="sm"
-              variant="outline"
-              onClick={() => setShowCommentForm(true)}
-              disabled={showCommentForm}
-            >
-              <BiPlus/>
-            </IconButton>
-          )}
-        </Flex>
-
-        {/* Comment Form */}
-        {showCommentForm && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Box mb={4} p={4} bg="gray.50" borderRadius="md" border="1px solid" borderColor="gray.200">
-              <Textarea
-                value={commentContent}
-                onChange={(e) => setCommentContent(e.target.value)}
-                placeholder="Write your comment here..."
-                resize="vertical"
-                minH="100px"
-                mb={3}
-                bg="white"
-              />
-              <Flex gap={2}>
-                <Button
-                  size="sm"
-                  colorScheme="teal"
-                  onClick={handleSubmitComment}
-                  loading={submittingComment}
-                  loadingText="Submitting..."
-                >
-                  Submit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleCancelComment}
-                  disabled={submittingComment}
-                >
-                  Cancel
-                </Button>
-              </Flex>
-            </Box>
-          </motion.div>
-        )}
-
-        {/* Comments List */}
-        {commentsLoading ? (
-          <Spinner />
-        ) : comments.length === 0 ? (
-          <Text color="gray.500">No comments yet.</Text>
-        ) : (
-          <Stack spaceY={4}>
-            {comments.map(comment => (
-              <Box key={comment.id} p={3} bg="gray.50" borderRadius="md" shadow="sm">
-                <Text fontSize="sm" mb={1}>"{comment.content}"</Text>
-                <Stack direction="row" justify="space-between" fontSize="xs" color="gray.500">
-                  <Text>by {comment.author.username}</Text>
-                  <Text>{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</Text>
-                </Stack>
-              </Box>
-            ))}
-          </Stack>
-        )}
-      </Box>
+      <Comments postId={post.id} user={user} />
     </Box>
   );
 };
