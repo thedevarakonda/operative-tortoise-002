@@ -18,6 +18,7 @@ import { BiEdit, BiArrowBack } from "react-icons/bi";
 import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
 import PostActions from "../components/PostActions"; // Import the PostActions component
+import { formatDistanceToNow } from 'date-fns';
 
 interface UserProfile {
   name: string;
@@ -276,7 +277,7 @@ const Profile = () => {
                 <Text mb={3}>{post.content}</Text>
                 <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500">
                   <Text>by {post.author?.username}</Text>
-                  <Text>{new Date(post.updatedAt).toLocaleString()}</Text>
+                  <Text>{formatDistanceToNow(new Date(post.updatedAt), { addSuffix: true })}</Text>
                 </Stack>
 
                 {/* Replace the entire actions section with PostActions component */}
