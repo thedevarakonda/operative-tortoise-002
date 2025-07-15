@@ -18,6 +18,7 @@ import { useAuth } from "../context/AuthContext";
 import { useDeletePost } from "../hooks/useDeletePost";
 import { toaster } from "../components/ui/toaster";
 import PostActions from "../components/PostActions"; // Import the PostActions component
+import { formatDistanceToNow } from "date-fns";
 
 interface PostDetail {
   id: number;
@@ -267,7 +268,7 @@ const PostDetail = () => {
       {/* Author and Date */}
       <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500" mb={2}>
         <Text>By {post.author.username}</Text>
-        <Text>{new Date(post.createdAt).toLocaleString()}</Text>
+        <Text>{formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}</Text>
       </Stack>
 
       {/* Post Actions - Replace the entire actions section */}
@@ -349,7 +350,7 @@ const PostDetail = () => {
                 <Text fontSize="sm" mb={1}>"{comment.content}"</Text>
                 <Stack direction="row" justify="space-between" fontSize="xs" color="gray.500">
                   <Text>by {comment.author.username}</Text>
-                  <Text>{new Date(comment.createdAt).toLocaleString()}</Text>
+                  <Text>{formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}</Text>
                 </Stack>
               </Box>
             ))}
