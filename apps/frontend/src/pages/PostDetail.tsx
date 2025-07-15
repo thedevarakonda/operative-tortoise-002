@@ -33,15 +33,6 @@ interface PostDetail {
   };
 }
 
-interface Comment {
-  id: number;
-  content: string;
-  createdAt: string;
-  author: {
-    username: string;
-  };
-}
-
 const PostDetail = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -50,11 +41,6 @@ const PostDetail = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { deletePost } = useDeletePost();
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [commentsLoading, setCommentsLoading] = useState(true);
-  const [showCommentForm, setShowCommentForm] = useState(false);
-  const [commentContent, setCommentContent] = useState("");
-  const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -69,99 +55,9 @@ const PostDetail = () => {
       }
     };
 
-    const fetchComments = async () => {
-      try {
-        const res = await fetch(`http://localhost:3001/api/post/${id}/comments`);
-        const data = await res.json();
-        setComments(data);
-      } catch (err) {
-        console.error("Failed to fetch comments", err);
-      } finally {
-        setCommentsLoading(false);
-      }
-    };
-
     fetchPost();
-    fetchComments();
   }, [id]);
 
-  useEffect(() => {
-    if (location.state?.openCommentForm && user) {
-      setShowCommentForm(true);
-    }
-  }, [location.state, user]);
-
-  const handleSubmitComment = async () => {
-    if (!commentContent.trim()) {
-      toaster.create({
-        title: "Error",
-        description: "Comment cannot be empty",
-        type: "error",
-        duration: 3000,
-        closable: true,
-      });
-      return;
-    }
-
-    if (!user?.id) {
-      toaster.create({
-        title: "Error",
-        description: "You must be logged in to comment",
-        type: "error",
-        duration: 3000,
-        closable: true,
-      });
-      return;
-    }
-
-    setSubmittingComment(true);
-    try {
-      const response = await fetch(`http://localhost:3001/api/post/${id}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          content: commentContent.trim(),
-          authorId: user.id,
-        }),
-      });
-
-      if (response.ok) {
-        const newComment = await response.json();
-        // Add the new comment to the beginning of the array (since backend orders by createdAt desc)
-        setComments([newComment, ...comments]);
-        setCommentContent("");
-        setShowCommentForm(false);
-        toaster.create({
-          title: "Success",
-          description: "Comment added successfully",
-          type: "success",
-          duration: 3000,
-          closable: true,
-        });
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit comment');
-      }
-    } catch (err) {
-      console.error("Failed to submit comment", err);
-      toaster.create({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to submit comment",
-        type: "error",
-        duration: 3000,
-        closable: true,
-      });
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
-
-  const handleCancelComment = () => {
-    setCommentContent("");
-    setShowCommentForm(false);
-  };
 
   const handleUpvoteUpdate = (newUpvotes: number) => {
     if (post) {
@@ -179,19 +75,6 @@ const PostDetail = () => {
     if (post) {
       deletePost(post.id, () => navigate('/feed'));
     }
-  };
-
-  const handleCommentClick = () => {
-    if (!user) {
-      toaster.create({
-        title: "Error",
-        description: "You must be logged in to comment",
-        type: "error",
-        duration: 3000,
-      });
-      return;
-    }
-    setShowCommentForm(true);
   };
 
   if (loading) {
@@ -217,7 +100,6 @@ const PostDetail = () => {
     author: {
       username: post.author.username,
     },
-    commentCount: comments.length, // Use the actual comments count
   };
 
   return (
@@ -277,7 +159,6 @@ const PostDetail = () => {
         <PostActions
           post={postForActions}
           onUpvoteUpdate={handleUpvoteUpdate}
-          onCommentClick={handleCommentClick}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
         />

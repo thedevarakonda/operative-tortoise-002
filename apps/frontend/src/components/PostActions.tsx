@@ -93,7 +93,7 @@ const PostActions: React.FC<PostActionsProps> = ({
               <IconButton
                 size={size}
                 aria-label="Upvote"
-                variant={hasUpvoted(post.id) ? 'solid' : 'ghost'}
+                variant={hasUpvoted(post.id) ? 'solid' : 'outline'}
                 onClick={handleUpvote}
               >
                 <BiSolidUpvote />
