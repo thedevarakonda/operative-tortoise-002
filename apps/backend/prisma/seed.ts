@@ -1,3 +1,4 @@
+// apps/backend/prisma/seed.ts
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -24,12 +25,14 @@ async function main() {
         content: 'This is the content of the first post.',
         upvotes: 10,
         authorId: user.id,
+        mediaUrl: '/uploads/dummy-image-1.jpg', // 👈 Added mediaUrl
       },
       {
         title: 'Second Post',
         content: 'Another post with some interesting thoughts.',
         upvotes: 5,
         authorId: user.id,
+        mediaUrl: '/uploads/dummy-video-1.mp4', // 👈 Added mediaUrl
       },
       {
         title: 'Why TypeScript is Awesome',
