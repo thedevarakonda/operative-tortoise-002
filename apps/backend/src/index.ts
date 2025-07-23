@@ -1,25 +1,30 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth';
-import postRoutes from './routes/posts';
+import postsRoutes from './routes/posts';
+import commentsRoutes from './routes/comments';
 import profileRoutes from './routes/profile';
-import userRoutes from './routes/users'
-import commentRoutes from './routes/comments'
+import usersRoutes from './routes/users';
+import path from 'path';
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-app.use(express.json()); // Middleware to parse JSON
-app.use(cors());
+app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(express.json());
 
-app.use('/api', authRoutes); // Mount auth routes
-app.use('/api', postRoutes);
-app.use('/api',profileRoutes);
-app.use('/api',userRoutes);
-app.use('/api',commentRoutes);
+// Serve static files from the 'uploads' directory
+// This makes files in 'apps/backend/uploads' accessible via '/uploads' URL
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+app.use('/api', authRoutes);
+app.use('/api', postsRoutes);
+app.use('/api', commentsRoutes);
+app.use('/api', profileRoutes);
+app.use('/api', usersRoutes);
 
 app.get('/', (_req, res) => {
-  res.send('API is running...');
+  res.send('Backend is running!');
 });
 
 app.listen(PORT, () => {

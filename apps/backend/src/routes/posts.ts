@@ -1,8 +1,41 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import multer from 'multer'; 
+import path from 'path';    
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+// Configure Multer for file storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // Ensure the uploads directory exists relative to the backend root
+    cb(null, path.join(__dirname, '../../uploads'));
+  },
+  filename: (req, file, cb) => {
+    // Create a unique filename by appending timestamp and original extension
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// Initialize Multer upload middleware
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit 
+  fileFilter: (req, file, cb) => {
+    // Allow only images and videos (you can extend this list)
+    const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|webm/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Only images and videos are allowed!'));
+    }
+  }
+});
+
 
 router.post('/posts/:id/upvote', async (req,res) => {
   const postId = req.params.id;
@@ -31,13 +64,26 @@ router.post('/posts/:id/unvote', async (req, res) => {
   }
 });
 
-// Create a new post
-router.post('/posts', async (req, res) => {
+// Create a new post with optional media upload
+router.post('/posts', upload.single('media'), async (req, res) => { 
   const { title, content, authorId } = req.body;
+  const mediaFile = req.file; 
+
   console.log("In / post")
   if (!title || !content || !authorId) {
+    // If there's a file, but other fields are missing, clean up the file
+    if (mediaFile) {
+        // You might want to delete the uploaded file here if the post creation fails
+        // Example: fs.unlinkSync(mediaFile.path); (requires 'fs' import)
+    }
     res.status(400).json({ error: 'Title, content, and authorId are required' });
     return;
+  }
+
+  let mediaUrl: string | undefined;
+  if (mediaFile) {
+    // Construct the URL to access the uploaded media
+    mediaUrl = `/uploads/${mediaFile.filename}`; // This matches the static route in index.ts
   }
 
   try {
@@ -46,12 +92,18 @@ router.post('/posts', async (req, res) => {
         title,
         content,
         authorId,
+        mediaUrl, 
       },
     });
     res.json(post);
-  } catch (err) {
+  } catch (err: any) { // Add ': any' to err for type safety if you're not narrowing it further
     console.error(err);
-    res.status(500).json({ error: 'Failed to create post' });
+    // If Prisma creation fails, you might want to delete the uploaded file
+    if (mediaFile) {
+        // You would need to import 'fs' for this: import fs from 'fs';
+        // fs.unlinkSync(mediaFile.path);
+    }
+    res.status(500).json({ error: 'Failed to create post', details: err.message });
   }
 });
 
@@ -125,7 +177,8 @@ router.get('/posts/:id', async (req, res) => {
         id: true,
         title: true,
         content: true,
-        createdAt: true
+        createdAt: true,
+        mediaUrl: true,
       }
     });
     res.json(posts);
@@ -137,7 +190,7 @@ router.get('/posts/:id', async (req, res) => {
 // Update an existing post
 router.put('/posts/:id', async (req, res) => {
   const postId = Number(req.params.id);
-  const { title, content } = req.body;
+  const { title, content } = req.body; // Note: For updating media, you'd need another upload handler
 
   if (!title || !content) {
     res.status(400).json({ error: 'Title and content are required' });
@@ -165,9 +218,25 @@ router.delete('/posts/:id', async (req, res) => {
   const postId = Number(req.params.id);
   console.log("in delete req handler")
   try {
+    // Optional: Fetch the post first to get mediaUrl and delete the file from disk
+    const postToDelete = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { mediaUrl: true }
+    });
+
     await prisma.post.delete({
       where: { id: postId },
     });
+
+    // If a media file exists, delete it from the server
+    if (postToDelete?.mediaUrl) {
+      const filePath = path.join(__dirname, '../../', postToDelete.mediaUrl);
+      // You would need to import 'fs' for this: import fs from 'fs';
+      // fs.unlink(filePath, (err) => {
+      //   if (err) console.error('Failed to delete media file:', err);
+      // });
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error(err);
@@ -184,6 +253,18 @@ router.get('/posts/:id/detail', async (req, res) => {
     const post = await prisma.post.findUnique({
       where: { id: postId },
       include: {
+        author: {
+          select: { username: true, avatar: true }
+        }
+      },
+      select: { // 👈 Explicitly select fields, including mediaUrl
+        id: true,
+        title: true,
+        content: true,
+        mediaUrl: true, // Make sure mediaUrl is selected
+        createdAt: true,
+        updatedAt: true,
+        upvotes: true,
         author: {
           select: { username: true, avatar: true }
         }
