@@ -16,6 +16,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.0.3",
     "nodemon": "^3.1.10",
     "prisma": "^6.10.1",
@@ -25,9 +26,10 @@
   "dependencies": {
     "@prisma/client": "^6.10.1",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
   },
   "prisma": {
-  "seed": "ts-node --transpile-only prisma/seed.ts"
-}
+    "seed": "ts-node --transpile-only prisma/seed.ts"
+  }
 }
