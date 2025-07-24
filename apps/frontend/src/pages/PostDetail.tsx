@@ -10,14 +10,12 @@ import {
   Button,
   Textarea
 } from "@chakra-ui/react";
-import { BiArrowBack, BiPlus } from "react-icons/bi";
+import { BiArrowBack } from "react-icons/bi";
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { motion } from 'framer-motion';
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDeletePost } from "../hooks/useDeletePost";
-import { toaster } from "../components/ui/toaster";
-import PostActions from "../components/PostActions"; // Import the PostActions component
+import PostActions from "../components/PostActions";
 import { formatDistanceToNow } from "date-fns";
 import Comments from "../components/Comments";
 
@@ -25,6 +23,7 @@ interface PostDetail {
   id: number;
   title: string;
   content: string;
+  mediaUrl?: string; // 👈 Add the mediaUrl field
   createdAt: string;
   upvotes: number;
   author: {
@@ -35,7 +34,6 @@ interface PostDetail {
 
 const PostDetail = () => {
   const { id } = useParams();
-  const location = useLocation();
   const [post, setPost] = useState<PostDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -57,7 +55,6 @@ const PostDetail = () => {
 
     fetchPost();
   }, [id]);
-
 
   const handleUpvoteUpdate = (newUpvotes: number) => {
     if (post) {
@@ -93,7 +90,6 @@ const PostDetail = () => {
     );
   }
 
-  // Create a post object that matches the PostActions interface
   const postForActions = {
     id: post.id,
     upvotes: post.upvotes,
@@ -101,6 +97,11 @@ const PostDetail = () => {
       username: post.author.username,
     },
   };
+
+  // Determine if media is an image or video based on its file extension
+  const isImage = post.mediaUrl && /\.(jpg|jpeg|png|gif)$/i.test(post.mediaUrl);
+  const isVideo = post.mediaUrl && /\.(mp4|mov|avi|webm)$/i.test(post.mediaUrl);
+
 
   return (
     <Box maxW="xl" mx="auto" mt={10} p={6} bg="white" rounded="md" shadow="md">
@@ -145,8 +146,18 @@ const PostDetail = () => {
         <Heading size="md">{post.title}</Heading>
       </Stack>
 
+      {/* Media */}
+      {isImage && (
+        <Image src={`http://localhost:3001${post.mediaUrl}`} alt={post.title} mt={4} maxH="500px" objectFit="contain" />
+      )}
+      {isVideo && (
+        <video>
+          <source src={`http://localhost:3001${post.mediaUrl}`} type="video/mp4" />
+        </video>
+      )}
+
       {/* Content */}
-      <Text mb={4}>{post.content}</Text>
+      <Text my={4}>{post.content}</Text>
 
       {/* Author and Date */}
       <Stack direction="row" justify="space-between" fontSize="sm" color="gray.500" mb={2}>
