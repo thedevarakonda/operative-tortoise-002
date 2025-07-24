@@ -252,22 +252,29 @@ router.get('/posts/:id/detail', async (req, res) => {
   try {
     const post = await prisma.post.findUnique({
       where: { id: postId },
-      include: {
-        author: {
-          select: { username: true, avatar: true }
-        }
-      },
-      select: { // 👈 Explicitly select fields, including mediaUrl
+      // REMOVED 'include' block
+      select: { // Combined all desired fields and relations here
         id: true,
         title: true,
         content: true,
-        mediaUrl: true, // Make sure mediaUrl is selected
+        mediaUrl: true,
         createdAt: true,
         updatedAt: true,
         upvotes: true,
-        author: {
+        author: { // Select specific fields from the author relation
           select: { username: true, avatar: true }
-        }
+        },
+        // If you wanted to include comments here, you would add:
+        // comments: {
+        //   select: {
+        //     id: true,
+        //     content: true,
+        //     createdAt: true,
+        //     author: {
+        //       select: { username: true, avatar: true }
+        //     }
+        //   }
+        // }
       }
     });
 
