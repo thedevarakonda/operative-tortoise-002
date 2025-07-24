@@ -45,3 +45,5 @@ coverage/
 /generated/prisma
 
 /apps/backend/prisma/dev.db
+
+/apps/backend/uploads   

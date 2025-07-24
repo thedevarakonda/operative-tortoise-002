@@ -85,12 +85,13 @@ router.post('/posts', upload.single('media'), async (req, res) => {
     // Construct the URL to access the uploaded media
     mediaUrl = `/uploads/${mediaFile.filename}`; // This matches the static route in index.ts
   }
-
+  const defaultUpvotes = 0;
   try {
     const post = await prisma.post.create({
       data: {
         title,
         content,
+        upvotes: defaultUpvotes,
         authorId,
         mediaUrl, 
       },
