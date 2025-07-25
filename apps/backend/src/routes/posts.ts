@@ -219,12 +219,18 @@ router.delete('/posts/:id', async (req, res) => {
   const postId = Number(req.params.id);
   console.log("in delete req handler")
   try {
+    // First, delete all comments associated with the post
+    await prisma.comment.deleteMany({
+      where: { postId: postId },
+    });
+
     // Optional: Fetch the post first to get mediaUrl and delete the file from disk
     const postToDelete = await prisma.post.findUnique({
       where: { id: postId },
       select: { mediaUrl: true }
     });
 
+    // Now, delete the post
     await prisma.post.delete({
       where: { id: postId },
     });
