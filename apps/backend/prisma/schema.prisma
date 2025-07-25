@@ -16,7 +16,9 @@ model User {
   bio       String?
   createdAt DateTime @default(now())
   posts Post[]
-  comments  Comment[] // 👈 Add this line
+  comments  Comment[]
+  receivedNotifications Notification[] @relation("Recipient")
+  sentNotifications     Notification[] @relation("Sender")
 }
 
 model Post {
@@ -30,6 +32,26 @@ model Post {
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
   comments  Comment[]
+  notifications Notification[]
+}
+
+// Define the different types of notifications
+enum NotificationType {
+  NEW_COMMENT
+  NEW_UPVOTE
+}
+
+model Notification {
+  id          Int              @id @default(autoincrement())
+  post        Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId      Int
+  recipient   User             @relation("Recipient", fields: [recipientId], references: [id])
+  recipientId String // <-- Changed from Int to String
+  sender      User             @relation("Sender", fields: [senderId], references: [id])
+  senderId    String // <-- Changed from Int to String
+  type        NotificationType
+  read        Boolean          @default(false)
+  createdAt   DateTime         @default(now())
 }
 
 model Comment {
