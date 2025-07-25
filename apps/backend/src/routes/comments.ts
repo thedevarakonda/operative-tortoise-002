@@ -5,25 +5,51 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// ✅ Add a comment to a post
+// ✅ Add a comment to a post (and create a notification)
 router.post('/post/:postId/comments', async (req, res) => {
   const { postId } = req.params;
-  const { content, authorId } = req.body;
+  // Assuming 'senderId' is who made the comment.
+  // In a real app, this should come from an authenticated session, e.g., req.user.id
+  const { content, authorId: senderId } = req.body;
 
-  if (!content || !authorId) {
-    res.status(400).json({ error: 'Missing content or authorId' });
-    return;
+  if (!content || !senderId) {
+    res.status(400).json({ error: 'Missing content or senderId' });
+    return ;
   }
 
   try {
+    const post = await prisma.post.findUnique({
+      where: { id: parseInt(postId) },
+      select: { authorId: true }, // Only need the authorId
+    });
+
+    if (!post) {
+      res.status(404).json({ error: 'Post not found' });
+      return ;
+    }
+
+    // 1. Create the comment first
     const comment = await prisma.comment.create({
       data: {
         content,
         postId: parseInt(postId),
-        authorId,
+        authorId: senderId,
       },
       include: { author: true },
     });
+
+    // 2. Create a notification, but only if someone else commented on the post
+    if (post.authorId !== senderId) {
+      await prisma.notification.create({
+        data: {
+          postId: parseInt(postId),
+          recipientId: post.authorId, // The author of the post
+          senderId: senderId,          // The author of the comment
+          type: 'NEW_COMMENT',
+        },
+      });
+    }
+
     res.status(201).json(comment);
   } catch (error) {
     console.error('Error creating comment:', error);
