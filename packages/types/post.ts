@@ -1,5 +1,5 @@
 export type Post = {
-  id: string;
+  id: number;
   title: string;
   content: string;
   authorId: string;
@@ -10,8 +10,8 @@ export type Post = {
 };
 
 export type Comment = {
-  id: string;
-  postId: string;
+  id: number;
+  postId: number;
   authorId: string;
   parentCommentId?: string;
   content: string;
