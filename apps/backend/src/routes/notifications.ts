@@ -5,7 +5,6 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 const router = express.Router();
 
-// Get all notifications for a user (assuming user ID is on req.body for now)
 router.get('/notifications/:userId', async (req, res) => {
   const { userId } = req.params;
 
@@ -14,10 +13,17 @@ router.get('/notifications/:userId', async (req, res) => {
       where: { recipientId: userId },
       orderBy: { createdAt: 'desc' },
       include: {
-        sender: { // Include sender's details
+        // Include details about the user who sent the notification
+        sender: { 
           select: {
             username: true,
             avatar: true,
+          },
+        },
+        post: {
+          select: {
+            id: true,    // Keep the ID for navigation links on the frontend
+            title: true, // Add the post title to the response
           },
         },
       },
@@ -31,7 +37,7 @@ router.get('/notifications/:userId', async (req, res) => {
 
 // Mark notifications as read
 router.post('/notifications/mark-as-read', async (req, res) => {
-  const { userId } = req.body; // Assuming userId is sent in the request body
+  const { userId } = req.body; 
 
   try {
     await prisma.notification.updateMany({
