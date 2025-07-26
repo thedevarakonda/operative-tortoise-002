@@ -11,14 +11,14 @@ import {
   Portal,
   IconButton,
   Spinner,
-  Circle, // ✨ NEW
+  Circle, 
 } from "@chakra-ui/react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { toaster } from "./ui/toaster";
 import { useState } from "react";
-import { useNotifications } from "../hooks/useNotifications"; // ✨ NEW
-// import NotificationPanel from "./NotificationPanel"; // ✨ NEW
+import { useNotifications } from "../hooks/useNotifications"; 
+import NotificationPanel from "./NotificationPanel";
 import { BiSolidBell } from "react-icons/bi";
 
 const Navbar = () => {
@@ -164,6 +164,7 @@ const Navbar = () => {
               >
                 <BiSolidBell />
               </IconButton>
+
               {unreadCount > 0 && (
                 <Circle
                   position="absolute"
@@ -177,8 +178,12 @@ const Navbar = () => {
                   {unreadCount}
                 </Circle>
               )}
-              {/* {isPanelOpen && <NotificationPanel notifications={notifications} />} */}
+
+              {isPanelOpen && (
+                <NotificationPanel notifications={notifications} />
+              )}
             </Box>
+
           )}
 
           <Menu.Root>
