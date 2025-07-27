@@ -49,6 +49,23 @@ export const useNotifications = () => {
     }
   };
 
+  const clearAllNotifications = async () => {
+    if (!user || notifications.length === 0) return;
+    try {
+      // ✨ UPDATED: Change to a POST request to the new endpoint
+      await fetch('http://localhost:3001/api/notifications/clear-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      // The local state update remains the same for instant UI feedback
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Failed to clear notifications:', error);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
 
@@ -58,5 +75,5 @@ export const useNotifications = () => {
     return () => clearInterval(interval); // Cleanup on component unmount
   }, [user]);
 
-  return { notifications, unreadCount, markAsRead };
+  return { notifications, unreadCount, markAsRead, clearAllNotifications };
 };
