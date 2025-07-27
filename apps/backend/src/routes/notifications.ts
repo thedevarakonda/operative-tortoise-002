@@ -10,7 +10,10 @@ router.get('/notifications/:userId', async (req, res) => {
 
   try {
     const notifications = await prisma.notification.findMany({
-      where: { recipientId: userId },
+      where: { 
+        recipientId: userId,
+        isCleared: false
+      },
       orderBy: { createdAt: 'desc' },
       include: {
         // Include details about the user who sent the notification
