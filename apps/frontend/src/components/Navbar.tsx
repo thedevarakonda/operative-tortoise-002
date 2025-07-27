@@ -28,7 +28,7 @@ const Navbar = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // ✨ NEW: Notification state and logic
-  const { notifications, unreadCount, markAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, clearAllNotifications } = useNotifications();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
   const handleBellClick = () => {
@@ -180,7 +180,7 @@ const Navbar = () => {
               )}
 
               {isPanelOpen && (
-                <NotificationPanel notifications={notifications} />
+                <NotificationPanel notifications={notifications} onClearAll={clearAllNotifications}  />
               )}
             </Box>
 
