@@ -46,11 +46,12 @@ model Notification {
   post        Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId      Int
   recipient   User             @relation("Recipient", fields: [recipientId], references: [id])
-  recipientId String // <-- Changed from Int to String
+  recipientId String
   sender      User             @relation("Sender", fields: [senderId], references: [id])
-  senderId    String // <-- Changed from Int to String
+  senderId    String
   type        NotificationType
   read        Boolean          @default(false)
+  isCleared   Boolean          @default(false)
   createdAt   DateTime         @default(now())
 }
 
