@@ -34,7 +34,7 @@ const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
             // Each notification links to the specific post
             <ChakraLink 
               as={RouterLink} 
-              // to={`/post/${notif.post.id}`} 
+              to={`/post/${notif.post.id}`} 
               key={notif.id} 
               _hover={{ textDecoration: 'none' }}
             >
@@ -54,7 +54,7 @@ const NotificationPanel = ({ notifications }: NotificationPanelProps) => {
                   <Text as="span" fontWeight="bold">{notif.sender.username}</Text>
                   {notif.type === 'NEW_COMMENT'
                     ? ` commented on your post "${notif.post.title}".`
-                    : ' upvoted your post.'}
+                    : ` upvoted your post "${notif.post.title}".`}
                 </Text>
               </Flex>
             </ChakraLink>

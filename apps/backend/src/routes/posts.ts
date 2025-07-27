@@ -37,14 +37,44 @@ const upload = multer({
 });
 
 
-router.post('/posts/:id/upvote', async (req,res) => {
-  const postId = req.params.id;
-  console.log("In upvote handler Got id ",postId);
+router.post('/posts/:id/upvote', async (req, res) => {
+  const postId = Number(req.params.id);
+  const { userId: senderId } = req.body; // Assume the upvoter's ID is sent in the body
+
+  if (!senderId) {
+    res.status(400).json({ error: 'Missing userId in request body' });
+    return;
+  }
+
   try {
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { authorId: true },
+    });
+
+    if (!post) {
+      res.status(404).json({ error: 'Post not found' })
+      return; 
+    }
+
+    // Increment the upvote count
     await prisma.post.update({
-      where: { id: Number(postId) },
+      where: { id: postId },
       data: { upvotes: { increment: 1 } },
     });
+
+    // Create a notification if the upvoter is not the post author
+    if (post.authorId !== senderId) {
+      await prisma.notification.create({
+        data: {
+          postId: postId,
+          recipientId: post.authorId,
+          senderId: senderId,
+          type: 'NEW_UPVOTE',
+        },
+      });
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: 'Failed to upvote post' });
