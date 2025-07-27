@@ -59,4 +59,24 @@ router.post('/notifications/mark-as-read', async (req, res) => {
   }
 });
 
+// Handle "clear all" request from the frontend
+router.post('/notifications/clear-all', async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    await prisma.notification.updateMany({
+      where: {
+        recipientId: userId,
+      },
+      data: {
+        isCleared: true, // Set the cleared flag to true
+      },
+    });
+    res.status(200).json({ message: 'All notifications cleared' });
+  } catch (error)    {
+    console.error('Error clearing notifications:', error);
+    res.status(500).json({ error: 'Failed to clear notifications' });
+  }
+});
+
 export default router;
