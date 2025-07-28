@@ -1,35 +1,41 @@
 // apps/backend/src/routes/notifications.ts
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import { Prisma,PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get('/notifications/:userId', async (req, res) => {
   const { userId } = req.params;
-  // ✨ Get 'limit' from query params, default to 15 if not provided
-  const limit = req.query.limit ? parseInt(req.query.limit as string) : 15;
+  
+  // --- Query Parameters ---
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+  const cleared = req.query.cleared; // Can be 'true', 'false', or undefined
 
   try {
+    // --- Dynamic Where Clause ---
+    const where: Prisma.NotificationWhereInput = {
+      recipientId: userId,
+    };
+
+    // Only add the 'isCleared' filter if the client provides the 'cleared' query param
+    if (cleared === 'true') {
+      where.isCleared = true;
+    } else if (cleared === 'false') {
+      where.isCleared = false;
+    }
+    // If 'cleared' is not provided, the filter is omitted, and ALL notifications are fetched.
+
     const notifications = await prisma.notification.findMany({
-      where: {
-        recipientId: userId,
-        isCleared: false,
-      },
+      where, // Use the dynamically built where clause
       orderBy: { createdAt: 'desc' },
-      take: limit, // ✨ Use the limit from the query parameter
+      take: limit, // If 'limit' is undefined, Prisma fetches all records
       include: {
         sender: {
-          select: {
-            username: true,
-            avatar: true,
-          },
+          select: { username: true, avatar: true },
         },
         post: {
-          select: {
-            id: true,
-            title: true,
-          },
+          select: { id: true, title: true },
         },
       },
     });
