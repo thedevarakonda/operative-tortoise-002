@@ -10,7 +10,7 @@ import Profile from './pages/Profile';
 import ChangePassword from './pages/ChangePassword';
 import PostDetail from './pages/PostDetail';
 import Settings from './pages/Settings';
-
+import NotificationsPage from './pages/NotificationsPage';
 function App() {
   return (
     <AuthProvider>
@@ -33,6 +33,7 @@ function App() {
           <Route path="/change-password" element={<PrivateRoute><ChangePassword /></PrivateRoute>} />
           <Route path="/post/:id" element={<PostDetail />} />
           <Route path="/settings" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
