@@ -7,17 +7,19 @@ const router = express.Router();
 
 router.get('/notifications/:userId', async (req, res) => {
   const { userId } = req.params;
+  // ✨ Get 'limit' from query params, default to 15 if not provided
+  const limit = req.query.limit ? parseInt(req.query.limit as string) : 15;
 
   try {
     const notifications = await prisma.notification.findMany({
-      where: { 
+      where: {
         recipientId: userId,
-        isCleared: false
+        isCleared: false,
       },
       orderBy: { createdAt: 'desc' },
+      take: limit, // ✨ Use the limit from the query parameter
       include: {
-        // Include details about the user who sent the notification
-        sender: { 
+        sender: {
           select: {
             username: true,
             avatar: true,
@@ -25,16 +27,35 @@ router.get('/notifications/:userId', async (req, res) => {
         },
         post: {
           select: {
-            id: true,    // Keep the ID for navigation links on the frontend
-            title: true, // Add the post title to the response
+            id: true,
+            title: true,
           },
         },
       },
     });
+
+    res.setHeader('Cache-Control', 'no-store');
     res.json(notifications);
   } catch (error) {
     console.error('Error fetching notifications:', error);
     res.status(500).json({ error: 'Failed to fetch notifications' });
+  }
+});
+
+router.get('/notifications/:userId/unread-count', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const count = await prisma.notification.count({
+      where: {
+        recipientId: userId,
+        read: false,
+        isCleared: false,
+      },
+    });
+    res.json({ count });
+  } catch (error) {
+    console.error('Error fetching unread notification count:', error);
+    res.status(500).json({ error: 'Failed to fetch unread count' });
   }
 });
 
