@@ -26,7 +26,7 @@ export const useNotifications = () => {
     if (!user) return;
     try {
       // 1. Fetch the limited list of 5 notifications for the panel
-      const notificationsPromise = fetch(`http://localhost:3001/api/notifications/${user.id}?limit=5`);
+      const notificationsPromise = fetch(`http://localhost:3001/api/notifications/${user.id}?cleared=false&limit=5`);
       
       // 2. Fetch the total unread count for the badge icon
       const countPromise = fetch(`http://localhost:3001/api/notifications/${user.id}/unread-count`);
