@@ -1,7 +1,7 @@
 // apps/frontend/src/hooks/useNotifications.ts
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import type { Post } from '../../../../packages/types/post'; // Adjust path if needed
+import type { Post } from '../../../../packages/types/post';
 
 // Define the shape of a notification
 export interface Notification {
@@ -21,15 +21,35 @@ export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const fetchNotifications = async () => {
+  // ✨ UPDATED: This function now fetches data more efficiently
+  const fetchData = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`http://localhost:3001/api/notifications/${user.id}`);
-      const data: Notification[] = await response.json();
-      setNotifications(data);
-      setUnreadCount(data.filter(n => !n.read).length);
+      // 1. Fetch the limited list of 5 notifications for the panel
+      const notificationsPromise = fetch(`http://localhost:3001/api/notifications/${user.id}?limit=5`);
+      
+      // 2. Fetch the total unread count for the badge icon
+      const countPromise = fetch(`http://localhost:3001/api/notifications/${user.id}/unread-count`);
+
+      // Wait for both requests to complete at the same time
+      const [notificationsResponse, countResponse] = await Promise.all([
+        notificationsPromise,
+        countPromise,
+      ]);
+
+      if (!notificationsResponse.ok || !countResponse.ok) {
+        throw new Error('Failed to fetch notification data');
+      }
+
+      const notificationsData: Notification[] = await notificationsResponse.json();
+      const countData = await countResponse.json();
+
+      // Set the state with the results from our two separate API calls
+      setNotifications(notificationsData);
+      setUnreadCount(countData.count);
+
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error('Failed to fetch notifications data:', error);
     }
   };
 
@@ -41,7 +61,6 @@ export const useNotifications = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
       });
-      // After marking as read, update the state locally
       setUnreadCount(0);
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     } catch (error) {
@@ -52,13 +71,11 @@ export const useNotifications = () => {
   const clearAllNotifications = async () => {
     if (!user || notifications.length === 0) return;
     try {
-      // ✨ UPDATED: Change to a POST request to the new endpoint
       await fetch('http://localhost:3001/api/notifications/clear-all', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),
       });
-      // The local state update remains the same for instant UI feedback
       setNotifications([]);
       setUnreadCount(0);
     } catch (error) {
@@ -67,12 +84,17 @@ export const useNotifications = () => {
   };
 
   useEffect(() => {
-    fetchNotifications();
+    if (user) {
+      fetchData(); // Call the new, efficient function on load
 
-    // Optional: Set up polling to check for new notifications periodically
-    const interval = setInterval(fetchNotifications, 30000); // every 30 seconds
+      const interval = setInterval(fetchData, 30000); // Poll for new data
 
-    return () => clearInterval(interval); // Cleanup on component unmount
+      return () => clearInterval(interval);
+    } else {
+      // If user logs out, clear the state
+      setNotifications([]);
+      setUnreadCount(0);
+    }
   }, [user]);
 
   return { notifications, unreadCount, markAsRead, clearAllNotifications };

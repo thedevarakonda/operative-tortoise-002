@@ -1,4 +1,3 @@
-// apps/frontend/src/components/NotificationPanel.tsx
 import 
 { Box, 
   Text, 
@@ -6,7 +5,7 @@ import
   Link as ChakraLink, 
   Image, 
   Flex,
-  IconButton
+  IconButton,
 }   from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 import type { Notification } from '../hooks/useNotifications'; 
@@ -88,6 +87,19 @@ const NotificationPanel = ({ notifications, onClearAll }: NotificationPanelProps
           )}
         ))}
       </VStack>
+      <ChakraLink
+        as={RouterLink}
+        to="/notifications"
+        fontWeight="bold"
+        color="blue.500"
+        textAlign="center"
+        p={2}
+        display="block"
+        fontSize="sm"
+        _hover={{ bg: 'gray.100' }}
+      >
+        Show All
+      </ChakraLink>
     </Box>
   );
 };
